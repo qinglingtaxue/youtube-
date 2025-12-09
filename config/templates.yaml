@@ -1,0 +1,103 @@
+# 模板配置
+# 定义各种输出模板
+
+# 研究报告模板
+report_template: |
+  # YouTube视频研究分析报告
+
+  ## 研究概述
+  - 研究时间：{timestamp}
+  - 研究目标：{objective}
+  - 数据来源：YouTube API
+  - 分析视频数量：{video_count}个
+  - 发现模式数量：{pattern_count}个
+
+  ## 数据统计
+  - 总观看次数：{total_views:,}
+  - 平均观看次数：{avg_views:,.0f}
+  - 总时长：{total_duration:,}秒
+  - 平均时长：{avg_duration:.0f}秒
+
+  ## 核心发现
+
+  ### 热门主题
+  {top_topics}
+
+  ### 高频关键词
+  {top_keywords}
+
+  ### 模式分析
+  {patterns_analysis}
+
+  ## 内容创作建议
+  {recommendations}
+
+  ---
+  *本报告由YouTube视频研究工作流自动生成*
+
+# 模式分析模板
+pattern_template: |
+  ## 模式：{pattern_name}
+  - 出现频率：{frequency}次
+  - 置信度：{confidence:.2f}
+  - 涉及视频数：{video_count}个
+
+  ### 描述
+  {description}
+
+  ### 典型案例
+  {examples}
+
+  ### 应用建议
+  {suggestions}
+
+# 视频列表模板
+video_list_template: |
+  ## 视频列表
+
+  {videos}
+
+  ---
+  共找到{video_count}个相关视频
+
+# 关键词分析模板
+keyword_template: |
+  ## 关键词分析：{keyword}
+
+  - 出现次数：{count}
+  - 相关视频：{related_videos}个
+  - 平均观看次数：{avg_views:,.0f}
+
+  ### 相关视频
+  {videos}
+
+# 数据导出模板（JSON）
+json_template: |
+  {json_data}
+
+# 内容创作指南模板
+content_guide_template: |
+  # 内容创作指南
+
+  ## 基于研究的创作建议
+
+  ### 主题方向
+  {topic_directions}
+
+  ### 内容结构
+  {content_structure}
+
+  ### 标题优化
+  {title_optimization}
+
+  ### 标签建议
+  {tag_suggestions}
+
+  ### 发布时间建议
+  {timing_suggestions}
+
+  ### 竞争分析
+  {competition_analysis}
+
+  ## 实施步骤
+  {implementation_steps}

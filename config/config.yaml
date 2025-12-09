@@ -1,0 +1,244 @@
+# YouTube视频研究工作流配置文件
+# 版本: 1.0.0
+# 更新日期: 2025-12-09
+
+# MCP数据收集配置
+mcp_data_collection:
+  # 使用MCP fetch进行数据收集，无需API密钥
+  # 数据通过CC-Switch管理的MCP服务器获取
+
+  # 每次请求最大结果数
+  max_results: 50
+  # 地区代码（如CN、US、JP等）
+  region_code: CN
+  # 语言代码（如zh、en、ja等）
+  language: zh
+  # 请求超时时间（秒）
+  timeout: 30
+  # 重试次数
+  max_retries: 3
+  # 重试间隔（秒）
+  retry_delay: 1
+  # 是否启用缓存
+  enable_cache: true
+
+# 数据收集配置
+data_collection:
+  # 搜索关键词列表
+  keywords:
+    - "教程"
+    - "教学"
+    - "教程分享"
+    - "学习"
+    - "技能"
+  # 视频时长过滤（秒）
+  min_duration: 60
+  max_duration: 3600
+  # 发布时间过滤（天数）
+  published_after_days: 30
+  # 排序方式（date、rating、relevance、viewCount、title）
+  order: viewCount
+  # 是否包含直播视频
+  include_live: false
+  # 是否包含短片（Shorts）
+  include_shorts: false
+
+# 分析配置
+analysis:
+  # 最小模式出现频率
+  min_pattern_frequency: 3
+  # 相似度阈值（0-1）
+  similarity_threshold: 0.8
+  # 情感分析阈值（0-1）
+  sentiment_threshold: 0.6
+  # 最大关键词数量
+  max_keywords: 20
+  # 最小标题长度
+  min_title_length: 10
+  # 最大标题长度
+  max_title_length: 100
+  # 是否进行词性标注
+  enable_pos_tagging: true
+  # 是否进行命名实体识别
+  enable_ner: true
+
+# 模板生成配置
+template:
+  # 输出目录
+  output_dir: output
+  # 输出格式（markdown、html、json）
+  format: markdown
+  # 最大内容长度
+  max_length: 5000
+  # 是否包含元数据
+  include_metadata: true
+  # 是否包含统计信息
+  include_stats: true
+  # 模板变量
+  variables:
+    project_name: "YouTube视频研究"
+    version: "1.0.0"
+    author: "研究团队"
+
+# 工作流配置
+workflow:
+  # 事件1：数据收集批处理大小
+  event1_batch_size: 10
+  # 事件2：选取顶级模式数量
+  event2_top_patterns: 5
+  # 事件3：最小模板数量
+  event3_min_templates: 3
+  # 是否保存中间结果
+  save_intermediate: true
+  # 中间结果保存目录
+  intermediate_dir: intermediate
+  # 是否启用并行处理
+  enable_parallel: true
+  # 并行进程数
+  parallel_workers: 4
+  # 是否启用进度显示
+  show_progress: true
+
+# 日志配置
+logging:
+  # 日志级别（DEBUG、INFO、WARNING、ERROR、CRITICAL）
+  level: INFO
+  # 日志文件路径
+  file: logs/research_workflow.log
+  # 是否输出到控制台
+  console: true
+  # 日志文件最大大小（MB）
+  max_file_size: 100
+  # 保留日志文件数量
+  backup_count: 5
+  # 日志格式
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# 缓存配置
+cache:
+  # 是否启用缓存
+  enabled: true
+  # 缓存目录
+  dir: cache
+  # 缓存过期时间（小时）
+  expire_hours: 24
+  # 最大缓存大小（MB）
+  max_size: 1000
+  # 缓存清理间隔（小时）
+  cleanup_interval: 6
+
+# 数据库配置
+database:
+  # 数据库类型（sqlite、mysql、postgresql）
+  type: sqlite
+  # SQLite数据库文件
+  sqlite_file: data/research_workflow.db
+  # MySQL配置
+  mysql:
+    host: localhost
+    port: 3306
+    user: root
+    password: ${MYSQL_PASSWORD}
+    database: research_workflow
+  # PostgreSQL配置
+  postgresql:
+    host: localhost
+    port: 5432
+    user: postgres
+    password: ${POSTGRES_PASSWORD}
+    database: research_workflow
+
+# 动态追踪配置
+monitoring:
+  # 是否启用动态追踪
+  enabled: true
+  # 监控关键词列表
+  keywords:
+    - "教程"
+    - "教学"
+    - "学习"
+    - "技能"
+    - "AI"
+    - "ChatGPT"
+    - "Python"
+    - "JavaScript"
+  # 竞品频道列表
+  competitors:
+    - "编程教学频道"
+    - "Web开发课堂"
+    - "AI学习室"
+    - "数据科学频道"
+  # 追踪频率配置
+  schedule:
+    # 每小时趋势检查
+    hourly_trend_check: true
+    # 每日摘要时间（24小时制）
+    daily_digest_time: "08:00"
+    # 周报生成时间
+    weekly_report_time: "09:00"
+    # 模式库更新间隔（天）
+    pattern_update_interval: 3
+  # 紧急阈值
+  thresholds:
+    # 新兴话题增长率阈值（超过此值认为是紧急）
+    emerging_topic_growth_rate: 5.0
+    # 病毒视频速度阈值（每小时观看数）
+    viral_video_velocity: 5000
+    # 竞品异常活跃阈值（每日视频数）
+    competitor_activity_threshold: 5
+
+# 实验配置（用于A/B测试）
+experiment:
+  # 是否启用实验模式
+  enabled: false
+  # 实验组数量
+  groups: 2
+  # 当前实验组
+  current_group: 1
+
+# 性能配置
+performance:
+  # 是否启用性能监控
+  enabled: true
+  # 监控指标（time、memory、cpu）
+  metrics: [time, memory]
+  # 是否启用性能优化
+  optimization: true
+  # 内存优化阈值（MB）
+  memory_threshold: 1024
+  # 垃圾回收间隔（秒）
+  gc_interval: 300
+
+# 安全配置
+security:
+  # 是否启用MCP服务器验证
+  validate_mcp_server: true
+  # 是否启用请求频率限制
+  rate_limit: true
+  # 每分钟最大请求数
+  max_requests_per_minute: 100
+  # 是否启用IP白名单
+  ip_whitelist: []
+  # 是否记录安全日志
+  log_security: true
+
+# 第三方服务配置
+services:
+  # OpenAI API（可选）
+  openai:
+    api_key: ${OPENAI_API_KEY}
+    model: gpt-3.5-turbo
+    max_tokens: 2000
+  # Claude API（可选）
+  claude:
+    api_key: ${CLAUDE_API_KEY}
+    model: claude-3-sonnet-20240229
+    max_tokens: 2000
+  # 数据存储服务
+  storage:
+    # S3配置
+    s3:
+      bucket: ${S3_BUCKET}
+      access_key: ${S3_ACCESS_KEY}
+      secret_key: ${S3_SECRET_KEY}
+      region: ap-northeast-1
