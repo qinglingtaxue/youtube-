@@ -161,7 +161,38 @@ python3 examples/quick_start.py
 python3 run.py workflow --keywords "教程,教学,学习" --max-videos 30
 ```
 
-### 4. 查看结果
+### 4. 跨平台跨地区调研（重点功能）⭐
+
+**找出竞争少的领域**：
+
+```bash
+# 查看可用地区
+python3 research.py regions
+
+# 查看低竞争地区
+python3 research.py regions --group low_competition
+
+# 执行真实数据调研（基于实际MCP调用）
+python3 research.py real "Python教程"
+
+# 执行多平台调研（模拟数据，演示流程）
+python3 research.py multi "数据分析"
+```
+
+**核心价值**：
+- ✅ 实际调用MCP工具收集YouTube、TikTok、Facebook、Instagram数据
+- ✅ 基于真实观看量、频道数、发布时间分析竞争度
+- ✅ 对比20个国家/地区，找出信息差和机会点
+- ✅ 生成详细的竞争分析和机会推荐报告
+
+**使用步骤**：
+1. 在Claude Code中执行MCP命令收集数据
+2. 系统自动分析竞争度
+3. 查看基于实际数据的分析报告
+
+详细说明请参考 [RESEARCH_TOOL.md](RESEARCH_TOOL.md)
+
+### 5. 查看结果
 ```bash
 # 查看输出文件
 ls -la output/quick_start/

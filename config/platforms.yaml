@@ -1,0 +1,100 @@
+# 平台配置
+platforms:
+  youtube:
+    name: "YouTube"
+    url: "https://www.youtube.com"
+    search_url: "https://www.youtube.com/results?search_query={query}&gl={region}"
+    data_type: "video"
+    content_format: "video"
+    competition_metrics:
+      - view_count
+      - channel_count
+      - video_count
+      - upload_frequency
+
+  tiktok:
+    name: "TikTok"
+    url: "https://www.tiktok.com"
+    search_url: "https://www.tiktok.com/search?q={query}"
+    data_type: "video"
+    content_format: "short_video"
+    competition_metrics:
+      - view_count
+      - like_count
+      - creator_count
+      - upload_frequency
+
+  facebook:
+    name: "Facebook"
+    url: "https://www.facebook.com"
+    search_url: "https://www.facebook.com/search/top/?q={query}"
+    data_type: "post"
+    content_format: "text_image"
+    competition_metrics:
+      - engagement_count
+      - page_count
+      - post_frequency
+
+  instagram:
+    name: "Instagram"
+    url: "https://www.instagram.com"
+    search_url: "https://www.instagram.com/explore/tags/{query}/"
+    data_type: "post"
+    content_format: "image_video"
+    competition_metrics:
+      - like_count
+      - post_count
+      - hashtag_usage
+
+# 平台分组
+groups:
+  video_platforms:
+    - youtube
+    - tiktok
+
+  social_platforms:
+    - facebook
+    - instagram
+
+  global_platforms:
+    - youtube
+    - tiktok
+    - facebook
+    - instagram
+
+# 内容类型
+content_types:
+  education:
+    - "教程"
+    - "教学"
+    - "学习"
+    - "课程"
+    - "指导"
+
+  entertainment:
+    - "娱乐"
+    - "搞笑"
+    - "音乐"
+    - "游戏"
+    - "电影"
+
+  lifestyle:
+    - "生活"
+    - "美食"
+    - "旅行"
+    - "时尚"
+    - "健身"
+
+  business:
+    - "商业"
+    - "创业"
+    - "投资"
+    - "营销"
+    - "管理"
+
+  technology:
+    - "科技"
+    - "编程"
+    - "AI"
+    - "数码"
+    - "互联网"
