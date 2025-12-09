@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube视频研究工作流 - 功能演示</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            font-weight: bold;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .features {
+            margin-top: 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .feature {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .feature h3 {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 YouTube视频研究工作流</h1>
+        <p>基于42COG框架的跨平台跨地区调研工具</p>
+
+        <a href="demo.html" class="btn">🚀 进入功能演示</a>
+
+        <div class="features">
+            <div class="feature">
+                <h3>📊 8+ 示例脚本</h3>
+                <p>完整的工作流演示</p>
+            </div>
+            <div class="feature">
+                <h3>🌍 20+ 地区支持</h3>
+                <p>跨地区数据对比</p>
+            </div>
+            <div class="feature">
+                <h3>📱 4 大平台</h3>
+                <p>YouTube、TikTok等</p>
+            </div>
+            <div class="feature">
+                <h3>⚡ 2小时完成</h3>
+                <p>从调研到模板</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 3秒后自动跳转
+        setTimeout(() => {
+            window.location.href = 'demo.html';
+        }, 3000);
+    </script>
+</body>
+</html>
