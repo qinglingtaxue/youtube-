@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/payrequest/claude-plugins/seo-content-writer/2c58657/SKILL.md

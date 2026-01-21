@@ -1,0 +1,62 @@
+# 存储策略配置
+
+# 视频文件存储
+videos:
+  # 保留策略
+  retention:
+    raw: 7  # 原始文件保留天数
+    processed: 30  # 处理后文件保留天数
+    published: 90  # 已发布视频保留天数
+
+  # 存储限制
+  limits:
+    max_file_size: "2GB"
+    max_total_size: "50GB"
+
+  # 自动清理
+  auto_cleanup:
+    enabled: true
+    schedule: "daily"
+    keep_published: true
+
+# 音频文件存储
+audio:
+  retention:
+    raw: 7
+    processed: 14
+  limits:
+    max_file_size: "500MB"
+    max_total_size: "10GB"
+
+# 字幕文件存储
+transcripts:
+  retention:
+    days: 90
+  formats:
+    - srt
+    - vtt
+    - txt
+
+# 缓存策略
+cache:
+  # 下载缓存
+  downloads:
+    max_size: "5GB"
+    ttl: 24  # 小时
+
+  # API 响应缓存
+  api:
+    max_size: "100MB"
+    ttl: 1  # 小时
+
+  # 缩略图缓存
+  thumbnails:
+    max_size: "500MB"
+    ttl: 168  # 7天
+
+# 备份策略
+backup:
+  enabled: false
+  destination: ""  # 备份目标路径
+  schedule: "weekly"
+  keep_count: 4

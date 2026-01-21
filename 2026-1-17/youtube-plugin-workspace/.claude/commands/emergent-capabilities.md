@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/aegntic/cldcde/emergent-capabilities/latest/emergent-capabilities/emergent-capabilities.md

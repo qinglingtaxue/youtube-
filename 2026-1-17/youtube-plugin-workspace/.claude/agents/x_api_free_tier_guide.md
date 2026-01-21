@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/aegntic/cldcde/x_api_free_tier_guide/latest/x_api_free_tier_guide/X_API_FREE_TIER_GUIDE.md

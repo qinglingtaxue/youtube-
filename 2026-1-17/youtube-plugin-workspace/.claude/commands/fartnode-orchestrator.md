@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/aegntic/cldcde/fartnode-orchestrator/latest/fartnode-orchestrator/fartnode-orchestrator.md

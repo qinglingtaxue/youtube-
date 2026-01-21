@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/aegntic/cldcde/sota-suite/latest/sota-suite/sota-suite.md

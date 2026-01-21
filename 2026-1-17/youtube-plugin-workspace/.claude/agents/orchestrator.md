@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/shintaro-sprech/agent-orchestrator-template/orchestrator/latest/orchestrator/orchestrator.md

@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/alirezarezvani/claude-skills/claude/latest/claude/CLAUDE.md

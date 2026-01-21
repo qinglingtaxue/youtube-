@@ -1,0 +1,91 @@
+# YouTube 内容创作流水线 - 主配置文件
+
+# 项目信息
+project:
+  name: "YouTube Content Pipeline"
+  version: "1.0.0"
+  description: "YouTube 内容创作全流程自动化工具"
+
+# 路径配置
+paths:
+  data_dir: "./data"
+  videos_dir: "./data/videos"
+  audio_dir: "./data/audio"
+  transcripts_dir: "./data/transcripts"
+  assets_dir: "./data/assets"
+  reports_dir: "./data/reports"
+  cache_dir: "./data/cache"
+  logs_dir: "./logs"
+
+# 调研模块配置
+research:
+  # YouTube 数据采集
+  youtube:
+    max_results: 50
+    default_region: "CN"
+    default_language: "zh-CN"
+
+  # 视频下载配置
+  download:
+    format: "best[height<=1080]"
+    audio_format: "mp3"
+    subtitles: true
+    subtitle_langs: ["zh", "en"]
+
+# 制作模块配置
+production:
+  # 视频处理
+  video:
+    output_format: "mp4"
+    codec: "libx264"
+    audio_codec: "aac"
+    default_resolution: "1920x1080"
+    default_fps: 30
+
+  # 音频处理
+  audio:
+    sample_rate: 44100
+    channels: 2
+    bitrate: "192k"
+
+  # 字幕配置
+  subtitle:
+    font: "PingFang SC"
+    font_size: 24
+    position: "bottom"
+
+# 发布模块配置
+publishing:
+  youtube:
+    default_privacy: "private"
+    notify_subscribers: false
+
+  # 发布前检查
+  pre_publish_checks:
+    - "video_quality"
+    - "audio_quality"
+    - "subtitle_sync"
+    - "metadata_complete"
+
+# 复盘模块配置
+analytics:
+  # 数据采集周期
+  collection_interval: 24  # 小时
+
+  # 报告生成
+  reports:
+    format: "markdown"
+    include_charts: true
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/app.log"
+  max_size: "10MB"
+  backup_count: 5
+
+# 数据库配置
+database:
+  type: "sqlite"
+  path: "./data/youtube_pipeline.db"

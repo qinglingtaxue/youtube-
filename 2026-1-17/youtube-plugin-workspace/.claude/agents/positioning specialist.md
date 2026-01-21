@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/jmagly/ai-writing-guide/positioning specialist/d5ed062/SKILL.md

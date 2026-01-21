@@ -1,0 +1,1 @@
+/Users/su/.42plugin/cache/alirezarezvani/claude-skills/readme/latest/readme/README.md
