@@ -7,31 +7,35 @@
 
 import argparse
 import yaml
+import sys
 from pathlib import Path
 from typing import Dict, List, Any
 
-from src.utils.config import get_config
-from src.research.real_data_collector import RealDataCollector
-from src.research.multi_platform_collector import MultiPlatformCollector
-from src.utils.logger import setup_logger
+# 添加src目录到Python路径
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
+
+from utils.config import get_config
+from research.real_data_collector import RealDataCollector
+from research.multi_platform_collector import MultiPlatformCollector
+from utils.logger import setup_logger
 
 def load_config():
     """加载配置文件"""
-    config = get_config()
+    config_dict = {}
 
     # 加载地区配置
     regions_file = Path(__file__).parent / 'config' / 'regions.yaml'
     if regions_file.exists():
         with open(regions_file, 'r', encoding='utf-8') as f:
-            config['regions'] = yaml.safe_load(f)
+            config_dict['regions'] = yaml.safe_load(f)
 
     # 加载平台配置
     platforms_file = Path(__file__).parent / 'config' / 'platforms.yaml'
     if platforms_file.exists():
         with open(platforms_file, 'r', encoding='utf-8') as f:
-            config['platforms'] = yaml.safe_load(f)
+            config_dict['platforms'] = yaml.safe_load(f)
 
-    return config
+    return config_dict
 
 def real_research(args):
     """执行真实数据调研"""

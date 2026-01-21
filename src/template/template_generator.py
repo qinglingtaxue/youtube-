@@ -48,8 +48,8 @@ class TemplateGenerator:
                 'name': '互动引导型',
                 'sections': [
                     {'name': '悬念开头', 'type': 'hook', 'required': True},
-                    {'name': '内容展示', 'type': 'content',},
-                    {'name 'required': True': '互动设置', 'type': 'interaction', 'required': True},
+                    {'name': '内容展示', 'type': 'content', 'required': True},
+                    {'name': '互动设置', 'type': 'interaction', 'required': True},
                     {'name': '引导关注', 'type': 'follow', 'required': True}
                 ]
             }

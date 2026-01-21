@@ -1,0 +1,57 @@
+[
+  {
+    "name": "批次1",
+    "type": "upload",
+    "video_folder": "",
+    "cover_folder": "",
+    "cover_mode": "single",
+    "group_pattern": "3,1,2",
+    "keywords": "",
+    "interval": 5,
+    "status": "待执行"
+  },
+  {
+    "name": "批次1",
+    "type": "upload",
+    "video_folder": "",
+    "cover_folder": "",
+    "cover_mode": "single",
+    "group_pattern": "3,1,2",
+    "keywords": "",
+    "interval": 5,
+    "status": "待执行"
+  },
+  {
+    "name": "批次1",
+    "type": "upload",
+    "video_folder": "",
+    "cover_folder": "",
+    "cover_mode": "single",
+    "group_pattern": "3,1,2",
+    "keywords": "",
+    "interval": 5,
+    "status": "待执行"
+  },
+  {
+    "name": "批次1",
+    "type": "upload",
+    "video_folder": "",
+    "cover_folder": "",
+    "cover_mode": "single",
+    "group_pattern": "3,1,2",
+    "keywords": "",
+    "interval": 5,
+    "status": "待执行"
+  },
+  {
+    "name": "批次1",
+    "type": "upload",
+    "video_folder": "",
+    "cover_folder": "",
+    "cover_mode": "single",
+    "group_pattern": "3,1,2",
+    "keywords": "",
+    "interval": 5,
+    "status": "待执行"
+  }
+]

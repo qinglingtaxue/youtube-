@@ -1,0 +1,13 @@
+{
+  "name": "youtube-uploader",
+  "version": "1.0.0",
+  "description": "YouTube 自动上传脚本",
+  "main": "upload.js",
+  "scripts": {
+    "upload": "node upload.js"
+  },
+  "dependencies": {
+    "googleapis": "^169.0.0",
+    "playwright": "^1.40.0"
+  }
+}

@@ -86,19 +86,24 @@ def quick_start_example():
         analyzer = PatternAnalyzer(config)
 
         # 分析视频模式
-        patterns = analyzer.analyze_videos(video_data)
-        logger.info(f"发现 {len(patterns)} 个模式")
+        result = analyzer.analyze_videos(video_data)
+        cases = result['selected_cases']
+
+        logger.info(f"发现 {len(cases)} 个典型案例")
 
         # 保存分析结果
         patterns_file = output_dir / 'patterns.json'
         with open(patterns_file, 'w', encoding='utf-8') as f:
-            json.dump(patterns, f, ensure_ascii=False, indent=2)
+            json.dump(result, f, ensure_ascii=False, indent=2)
         logger.info(f"模式分析结果已保存到: {patterns_file}")
 
-        # 显示前5个模式
-        logger.info("\n📊 前5个高频模式:")
-        for i, pattern in enumerate(patterns[:5], 1):
-            logger.info(f"{i}. {pattern['name']} (出现{pattern['frequency']}次)")
+        # 显示前5个案例
+        logger.info("\n📊 前5个典型案例:")
+        for i, case in enumerate(cases[:5], 1):
+            pattern_name = case.get('pattern_name', '未知模式')
+            title = case.get('title', '')[:30]
+            views = case.get('view_count', 0)
+            logger.info(f"{i}. {pattern_name} - {title}... ({views:,}次观看)")
 
     except Exception as e:
         logger.error(f"模式分析失败: {e}")
@@ -115,7 +120,7 @@ def quick_start_example():
         # 生成研究报告
         report = workflow.generate_report(
             video_data=video_data,
-            patterns=patterns,
+            patterns=cases,
             template_type='report'
         )
 
@@ -126,7 +131,7 @@ def quick_start_example():
 
         # 生成内容创作指南
         guide = workflow.generate_content_guide(
-            patterns=patterns,
+            patterns=cases,
             target_audience='初学者'
         )
 

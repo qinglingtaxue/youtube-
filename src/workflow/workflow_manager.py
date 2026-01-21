@@ -18,15 +18,19 @@ from creator.script_creator import ScriptCreator
 class WorkflowManager:
     """工作流管理器"""
     
-    def __init__(self, theme: str, output_dir: Path, 
+    def __init__(self, config_or_theme, output_dir: Path = None,
                  max_videos: int = 1000, max_cases: int = 10,
                  time_limit: int = 120, logger=None):
-        self.theme = theme
-        self.output_dir = output_dir
-        self.max_videos = max_videos
-        self.max_cases = max_cases
-        self.time_limit = time_limit  # 分钟
-        self.logger = logger
+        # 兼容传入config对象或theme字符串
+        if hasattr(config_or_theme, 'get'):  # Config对象有get方法
+            from utils.logger import setup_logger
+            self.theme = 'YouTube视频研究'
+            self.output_dir = output_dir or Path('output')
+            self.logger = logger or setup_logger('workflow_manager')
+        else:  # 直接传入theme字符串
+            self.theme = config_or_theme
+            self.output_dir = output_dir or Path('output')
+            self.logger = logger
         
         # 时间分配
         self.time_allocation = {
@@ -36,10 +40,10 @@ class WorkflowManager:
         }
         
         # 初始化模块
-        self.data_collector = DataCollector(logger)
-        self.pattern_analyzer = PatternAnalyzer(logger)
-        self.template_generator = TemplateGenerator(logger)
-        self.script_creator = ScriptCreator(logger)
+        self.data_collector = DataCollector(config_or_theme)
+        self.pattern_analyzer = PatternAnalyzer(config_or_theme)
+        self.template_generator = TemplateGenerator(config_or_theme)
+        self.script_creator = ScriptCreator(config_or_theme)
         
         # 工作流状态
         self.state = {
@@ -359,3 +363,48 @@ class WorkflowManager:
             'elapsed_time': time.time() - self.state['start_time'] if self.state['start_time'] else 0,
             'errors': self.state['errors']
         }
+
+    def generate_report(self, video_data: list, patterns: list, template_type: str = 'report') -> str:
+        """生成研究报告"""
+        report = f"# {self.theme}研究报告\n\n"
+        report += f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+
+        report += f"## 数据概览\n\n"
+        report += f"- 总视频数量: {len(video_data)}\n"
+        report += f"- 分析案例数量: {len(patterns)}\n\n"
+
+        report += f"## 典型案例分析\n\n"
+        for i, case in enumerate(patterns[:5], 1):
+            pattern_name = case.get('pattern_name', '未知模式')
+            title = case.get('title', '')
+            views = case.get('view_count', 0)
+            report += f"### 案例{i}: {pattern_name}\n"
+            report += f"- 标题: {title}\n"
+            report += f"- 观看量: {views:,}\n\n"
+
+        report += f"## 总结\n\n"
+        report += f"基于{len(video_data)}个视频的分析，我们识别出了{len(patterns)}个典型创作模式。\n"
+
+        return report
+
+    def generate_content_guide(self, patterns: list, target_audience: str = '初学者') -> str:
+        """生成内容创作指南"""
+        guide = f"# {self.theme}内容创作指南\n\n"
+        guide += f"目标受众: {target_audience}\n\n"
+
+        guide += f"## 创作建议\n\n"
+        guide += f"基于分析结果，以下是针对{target_audience}的创作建议：\n\n"
+
+        for i, case in enumerate(patterns[:3], 1):
+            pattern_name = case.get('pattern_name', '未知模式')
+            guide += f"### 建议{i}: {pattern_name}\n"
+            guide += f"- 这种模式在数据中表现良好\n"
+            guide += f"- 建议结合自身特色进行创作\n\n"
+
+        guide += f"## 实施步骤\n\n"
+        guide += f"1. 选择适合的创作模式\n"
+        guide += f"2. 准备相关素材\n"
+        guide += f"3. 按照模式结构进行创作\n"
+        guide += f"4. 持续优化和改进\n\n"
+
+        return guide

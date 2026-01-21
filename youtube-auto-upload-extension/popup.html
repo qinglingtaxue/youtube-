@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube 自动上传助手</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 YouTube 自动上传</h1>
+    
+    <div class="section">
+      <label>视频文件夹路径：</label>
+      <input type="text" id="videoPath" placeholder="/Users/su/Downloads/videos/">
+    </div>
+
+    <div class="section">
+      <label>封面图片路径：</label>
+      <input type="text" id="coverPath" placeholder="/Users/su/Downloads/cover.jpg">
+    </div>
+
+    <div class="section">
+      <label>播放列表名称：</label>
+      <input type="text" id="playlist" placeholder="毛泽东选集">
+    </div>
+
+    <div class="section">
+      <label>第一个视频发布时间：</label>
+      <input type="time" id="startTime" value="17:20">
+    </div>
+
+    <div class="section">
+      <label>视频间隔（分钟）：</label>
+      <div class="range-inputs">
+        <input type="number" id="minInterval" value="13" min="1" max="60">
+        <span>到</span>
+        <input type="number" id="maxInterval" value="16" min="1" max="60">
+      </div>
+    </div>
+
+    <div class="section checkbox-section">
+      <label>
+        <input type="checkbox" id="enableMonetization" checked>
+        开启盈利
+      </label>
+    </div>
+
+    <div class="section checkbox-section">
+      <label>
+        <input type="checkbox" id="selectFirstPlaylist" checked>
+        播放列表选择顶部第一个
+      </label>
+    </div>
+
+    <div class="buttons">
+      <button id="saveConfig" class="btn-secondary">保存配置</button>
+      <button id="startUpload" class="btn-primary">开始上传</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
