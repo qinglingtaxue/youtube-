@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>洞察系统 v2 - 主从布局</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航 */
+        .top-nav {
+            background: #1e293b;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .back-btn {
+            background: #334155;
+            border: none;
+            color: #94a3b8;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #475569;
+            color: #e2e8f0;
+        }
+
+        .keyword-badge {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* 时间切换 */
+        .time-switcher {
+            display: flex;
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 4px;
+            margin-left: auto;
+        }
+
+        .time-btn {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .time-btn:hover {
+            color: #e2e8f0;
+        }
+
+        .time-btn.active {
+            background: #334155;
+            color: #22c55e;
+        }
+
+        .time-range-text {
+            color: #64748b;
+            font-size: 13px;
+            margin-left: 12px;
+            align-self: center;
+        }
+
+        /* 主布局 */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 57px);
+        }
+
+        /* 左侧面板 */
+        .left-panel {
+            width: 340px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .panel-section {
+            padding: 20px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .section-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        /* 关键指标 */
+        .metrics-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .metric-item {
+            flex: 1;
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .metric-value.good { color: #22c55e; }
+        .metric-value.warning { color: #f59e0b; }
+        .metric-value.danger { color: #ef4444; }
+
+        .metric-change {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .metric-change.up { color: #22c55e; }
+        .metric-change.down { color: #ef4444; }
+        .metric-change.flat { color: #64748b; }
+
+        /* 机会卡片 */
+        .opportunity-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opportunity-card:hover {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
+            border-color: rgba(34, 197, 94, 0.5);
+        }
+
+        .opportunity-card.selected {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+
+        .opportunity-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #22c55e;
+            margin-bottom: 4px;
+        }
+
+        .opportunity-desc {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .opportunity-new {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+
+        /* 头部玩家 */
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 6px;
+        }
+
+        .player-item:hover {
+            background: #334155;
+        }
+
+        .player-item.selected {
+            background: #334155;
+            box-shadow: inset 3px 0 0 #06b6d4;
+        }
+
+        .player-rank {
+            width: 24px;
+            height: 24px;
+            background: #475569;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .player-rank.top { background: #f59e0b; color: #0f172a; }
+
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .player-stats {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .player-trend {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .player-trend.up {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .player-trend.down {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .player-trend.new {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+        }
+
+        /* 右侧面板 */
+        .right-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+        }
+
+        .detail-card {
+            background: #1e293b;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .detail-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .detail-subtitle {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .detail-body {
+            padding: 24px;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            height: 280px;
+            position: relative;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-box {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .chart-box .chart-container {
+            height: 200px;
+        }
+
+        /* 结论框 */
+        .conclusion-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(6, 182, 212, 0.05));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .conclusion-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #06b6d4;
+            margin-bottom: 8px;
+        }
+
+        .conclusion-text {
+            font-size: 14px;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .action-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .action-item {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .action-item.do {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .action-item.avoid {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* 特征条 */
+        .feature-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-label {
+            width: 80px;
+            font-size: 13px;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .feature-track {
+            flex: 1;
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .feature-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4, #22c55e);
+            border-radius: 4px;
+        }
+
+        .feature-value {
+            width: 40px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+            color: #22c55e;
+        }
+
+        /* 数据表格 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #0f172a;
+            color: #64748b;
+            font-weight: 500;
+            border-bottom: 1px solid #334155;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        .data-table tr:hover {
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        /* 时间对比指示 */
+        .time-compare {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #0f172a;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .time-compare-label {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .time-compare-value {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .time-compare-value.up { color: #22c55e; }
+        .time-compare-value.down { color: #ef4444; }
+
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #334155;
+            border-top-color: #06b6d4;
+            border-radius: 50%;
+            margin-left: 12px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 推理链折叠面板 */
+        .reasoning-panel {
+            border: 1px solid #334155;
+            border-radius: 8px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .reasoning-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #0f172a;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reasoning-toggle:hover {
+            background: #1e293b;
+        }
+
+        .reasoning-toggle-text {
+            font-size: 13px;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reasoning-toggle-icon {
+            color: #64748b;
+            transition: transform 0.2s;
+            font-size: 12px;
+        }
+
+        .reasoning-panel.open .reasoning-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .reasoning-content {
+            display: none;
+            padding: 0;
+            background: #1e293b;
+        }
+
+        .reasoning-panel.open .reasoning-content {
+            display: block;
+        }
+
+        /* 推理步骤 */
+        .reasoning-section {
+            padding: 16px 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .reasoning-section-title {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reasoning-section-title .icon {
+            font-size: 14px;
+        }
+
+        /* 原始数据表格（紧凑版） */
+        .compact-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .compact-table th {
+            text-align: left;
+            padding: 8px 10px;
+            background: #0f172a;
+            color: #64748b;
+            font-weight: 500;
+            border-bottom: 1px solid #334155;
+        }
+
+        .compact-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        .compact-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .compact-table tr:hover {
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        /* 分析方法说明 */
+        .method-box {
+            background: #0f172a;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .method-box code {
+            background: #334155;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #06b6d4;
+        }
+
+        /* 推理链可视化 */
+        .reasoning-chain {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .chain-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .chain-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 24px;
+            flex-shrink: 0;
+        }
+
+        .chain-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #06b6d4;
+            flex-shrink: 0;
+        }
+
+        .chain-dot.conclusion {
+            background: #22c55e;
+            width: 12px;
+            height: 12px;
+        }
+
+        .chain-line {
+            width: 2px;
+            height: 24px;
+            background: #334155;
+        }
+
+        .chain-content {
+            flex: 1;
+            padding-bottom: 12px;
+        }
+
+        .chain-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+
+        .chain-value {
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+
+        .chain-value.highlight {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .chain-arrow {
+            color: #64748b;
+            font-size: 12px;
+            padding: 4px 0;
+            text-align: center;
+        }
+
+        /* 置信度指示器 */
+        .confidence-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .confidence-track {
+            flex: 1;
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .confidence-fill.high { background: #22c55e; }
+        .confidence-fill.medium { background: #f59e0b; }
+        .confidence-fill.low { background: #ef4444; }
+
+        .confidence-text {
+            font-size: 12px;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        .confidence-text strong {
+            color: #e2e8f0;
+        }
+
+        /* 数据来源标签 */
+        .data-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #64748b;
+            background: #0f172a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
+        .data-source-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        /* 时间标签 */
+        .time-badge {
+            background: #334155;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* 市场概览 */
+        .market-summary {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .summary-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .summary-text {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #e2e8f0;
+        }
+
+        .market-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .market-stat {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .market-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .market-stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .market-stat-trend {
+            font-size: 11px;
+            margin-top: 6px;
+        }
+
+        .market-stat-trend.up { color: #22c55e; }
+        .market-stat-trend.down { color: #ef4444; }
+
+        .market-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .market-tag {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .market-tag.growth {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .market-tag.competition-medium {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        .market-tag.opportunity {
+            background: rgba(6, 182, 212, 0.15);
+            color: #06b6d4;
+        }
+
+        .market-tag.barrier-low {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+        }
+
+        /* 竞争格局 */
+        .competition-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .concentration-section {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .concentration-title {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .concentration-bar {
+            height: 32px;
+            background: #334155;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .concentration-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .concentration-desc {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .player-tiers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tier-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 3px solid #334155;
+        }
+
+        .tier-item.highlight {
+            border-left-color: #22c55e;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), transparent);
+        }
+
+        .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .tier-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .tier-share {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .tier-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .tier-insight {
+            font-size: 12px;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .tier-insight.opportunity {
+            color: #22c55e;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        /* 玩家数据网格 */
+        .player-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .player-stat-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .player-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .player-stat-value.highlight {
+            color: #22c55e;
+        }
+
+        .player-stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .player-stat-compare {
+            font-size: 11px;
+            color: #06b6d4;
+            margin-top: 4px;
+        }
+
+        /* 时间线 */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: #334155;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #475569;
+            border: 2px solid #1e293b;
+            z-index: 1;
+        }
+
+        .timeline-dot.start {
+            background: #64748b;
+        }
+
+        .timeline-dot.milestone {
+            background: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+        }
+
+        .timeline-dot.current {
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+        }
+
+        .timeline-date {
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .timeline-data {
+            font-size: 12px;
+            color: #06b6d4;
+            margin-top: 6px;
+        }
+
+        .timeline-decision {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #22c55e;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .decision-label {
+            font-size: 11px;
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .decision-text {
+            font-size: 13px;
+            color: #e2e8f0;
+            margin-left: 4px;
+        }
+
+        /* 内容结构分析 */
+        .content-structure {
+            background: #0f172a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .structure-header {
+            padding: 16px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .structure-category {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-icon {
+            font-size: 20px;
+        }
+
+        .category-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .category-badge {
+            background: #22c55e;
+            color: #0f172a;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .structure-body {
+            padding: 16px;
+        }
+
+        .topic-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .topic-item {
+            position: relative;
+            padding: 12px 16px;
+            background: #1e293b;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .topic-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(6, 182, 212, 0.15);
+            z-index: 0;
+        }
+
+        .topic-item.best .topic-bar {
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .topic-item.good .topic-bar {
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .topic-info {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .topic-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .topic-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .topic-badge.best {
+            background: #22c55e;
+            color: #0f172a;
+        }
+
+        .topic-badge.good {
+            background: #f59e0b;
+            color: #0f172a;
+        }
+
+        .topic-stats {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .topic-views {
+            color: #06b6d4;
+        }
+
+        .topic-insight {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: rgba(6, 182, 212, 0.1);
+            border-radius: 6px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .insight-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .insight-text {
+            font-size: 13px;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        /* 成功模式总结 */
+        .pattern-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .pattern-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+
+        .pattern-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #06b6d4, #22c55e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            flex-shrink: 0;
+        }
+
+        .pattern-content {
+            flex: 1;
+        }
+
+        .pattern-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .pattern-desc {
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .pattern-evidence {
+            font-size: 12px;
+            color: #06b6d4;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #334155;
+        }
+
+        /* 爆款视频列表 */
+        .video-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .video-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+
+        .video-rank {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            flex-shrink: 0;
+        }
+
+        .video-content {
+            flex: 1;
+        }
+
+        .video-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+        }
+
+        .video-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .video-views {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .video-date {
+            color: #64748b;
+        }
+
+        .video-topic {
+            background: #334155;
+            color: #94a3b8;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .video-analysis {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .analysis-tag {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: rgba(6, 182, 212, 0.15);
+            color: #06b6d4;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="top-nav">
+        <button class="back-btn" onclick="history.back()">← 返回</button>
+        <span class="keyword-badge">养生</span>
+
+        <!-- 时间切换 -->
+        <div class="time-switcher">
+            <button class="time-btn" onclick="switchTime(7)">7天</button>
+            <button class="time-btn" onclick="switchTime(30)">30天</button>
+            <button class="time-btn active" onclick="switchTime(90)">90天</button>
+        </div>
+        <span class="time-range-text" id="timeRangeText">2024.10.27 - 2025.01.24</span>
+    </div>
+
+    <!-- 主布局 -->
+    <div class="main-container">
+        <!-- 左侧：全局概览 -->
+        <div class="left-panel">
+            <!-- 关键指标 -->
+            <div class="panel-section">
+                <div class="section-label">关键指标</div>
+                <div class="metrics-row">
+                    <div class="metric-item">
+                        <div class="metric-label">总播放</div>
+                        <div class="metric-value" id="metricViews">2.1亿</div>
+                        <div class="metric-change up" id="metricViewsChange">↑ 12% vs 上期</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">活跃频道</div>
+                        <div class="metric-value" id="metricChannels">156</div>
+                        <div class="metric-change up" id="metricChannelsChange">↑ 8 个新入场</div>
+                    </div>
+                </div>
+                <div class="metrics-row" style="margin-top: 12px;">
+                    <div class="metric-item">
+                        <div class="metric-label">竞争程度</div>
+                        <div class="metric-value warning" id="metricCompetition">中等</div>
+                        <div class="metric-change flat" id="metricCompetitionChange">Top3 占 42%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">机会评分</div>
+                        <div class="metric-value good" id="metricScore">78</div>
+                        <div class="metric-change up" id="metricScoreChange">↑ 5 vs 上期</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 机会发现 -->
+            <div class="panel-section">
+                <div class="section-label">发现的机会</div>
+                <div id="opportunityList">
+                    <div class="opportunity-card selected" onclick="showOpportunity(this, 'content-type')">
+                        <div class="opportunity-title">
+                            食疗内容天花板最高
+                            <span class="opportunity-new">新发现</span>
+                        </div>
+                        <div class="opportunity-desc">平均播放 8.2万，是讲座类的 2.9 倍</div>
+                    </div>
+                    <div class="opportunity-card" onclick="showOpportunity(this, 'weekend')">
+                        <div class="opportunity-title">周末发布竞争少</div>
+                        <div class="opportunity-desc">发布量少 40%，但播放差不多</div>
+                    </div>
+                    <div class="opportunity-card" onclick="showOpportunity(this, 'blackhorse')">
+                        <div class="opportunity-title">2个黑马频道值得研究</div>
+                        <div class="opportunity-desc">爆发倍率超过 500 倍</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 头部玩家 -->
+            <div class="panel-section" style="border-bottom: none;">
+                <div class="section-label">头部玩家</div>
+                <div id="playerList">
+                    <div class="player-item" onclick="selectPlayer(this, 'laxnetcm')">
+                        <div class="player-rank top">1</div>
+                        <div class="player-info">
+                            <div class="player-name">laxnetcm</div>
+                            <div class="player-stats">2.3万订阅 · 均播 50.5万</div>
+                        </div>
+                        <span class="player-trend up">↑3</span>
+                    </div>
+                    <div class="player-item" onclick="selectPlayer(this, 'yangsheng')">
+                        <div class="player-rank">2</div>
+                        <div class="player-info">
+                            <div class="player-name">养生老郑</div>
+                            <div class="player-stats">4.5万订阅 · 均播 10万</div>
+                        </div>
+                        <span class="player-trend new">新</span>
+                    </div>
+                    <div class="player-item" onclick="selectPlayer(this, 'zhongyi')">
+                        <div class="player-rank">3</div>
+                        <div class="player-info">
+                            <div class="player-name">中医调理师</div>
+                            <div class="player-stats">8.2万订阅 · 均播 6.8万</div>
+                        </div>
+                        <span class="player-trend down">↓2</span>
+                    </div>
+                    <div class="player-item" onclick="selectPlayer(this, 'taiji')">
+                        <div class="player-rank">4</div>
+                        <div class="player-info">
+                            <div class="player-name">太极养生堂</div>
+                            <div class="player-stats">3.1万订阅 · 均播 4.2万</div>
+                        </div>
+                    </div>
+                    <div class="player-item" onclick="selectPlayer(this, 'shiliao')">
+                        <div class="player-rank">5</div>
+                        <div class="player-info">
+                            <div class="player-name">食疗小厨</div>
+                            <div class="player-stats">1.8万订阅 · 均播 3.5万</div>
+                        </div>
+                        <span class="player-trend new">新</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：详情 -->
+        <div class="right-panel" id="rightPanel">
+            <!-- 默认视图：全局认识 -->
+            <div id="opportunityView">
+                <!-- 市场整体画像 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div>
+                            <div class="detail-title">「养生」赛道全景</div>
+                            <div class="detail-subtitle">快速了解这个领域的整体情况</div>
+                        </div>
+                        <span class="time-badge">近 90 天数据</span>
+                    </div>
+                    <div class="detail-body">
+                        <!-- 一句话总结 -->
+                        <div class="market-summary">
+                            <div class="summary-icon">📊</div>
+                            <div class="summary-text">
+                                <strong>养生</strong>是一个<strong>中等竞争、高增长</strong>的赛道。
+                                近90天总播放量 <strong>2.1亿</strong>，同比增长 <strong>12%</strong>。
+                                头部集中度中等（Top3 占 42%），新人仍有机会切入。
+                            </div>
+                        </div>
+
+                        <!-- 关键数字 -->
+                        <div class="market-stats-grid">
+                            <div class="market-stat">
+                                <div class="market-stat-value">2.1亿</div>
+                                <div class="market-stat-label">总播放量</div>
+                                <div class="market-stat-trend up">↑ 12% vs 上期</div>
+                            </div>
+                            <div class="market-stat">
+                                <div class="market-stat-value">156</div>
+                                <div class="market-stat-label">活跃频道</div>
+                                <div class="market-stat-trend up">+8 新入场</div>
+                            </div>
+                            <div class="market-stat">
+                                <div class="market-stat-value">2147</div>
+                                <div class="market-stat-label">视频数量</div>
+                                <div class="market-stat-trend up">↑ 15%</div>
+                            </div>
+                            <div class="market-stat">
+                                <div class="market-stat-value">7.4万</div>
+                                <div class="market-stat-label">平均播放</div>
+                                <div class="market-stat-trend down">↓ 3%</div>
+                            </div>
+                        </div>
+
+                        <!-- 市场特征标签 -->
+                        <div class="market-tags">
+                            <span class="market-tag growth">增长中</span>
+                            <span class="market-tag competition-medium">中等竞争</span>
+                            <span class="market-tag opportunity">有套利空间</span>
+                            <span class="market-tag barrier-low">入场门槛低</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 竞争格局 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div>
+                            <div class="detail-title">竞争格局</div>
+                            <div class="detail-subtitle">头部玩家分布和新人机会</div>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="competition-layout">
+                            <!-- 头部集中度 -->
+                            <div class="concentration-section">
+                                <div class="concentration-title">头部集中度</div>
+                                <div class="concentration-bar">
+                                    <div class="concentration-fill" style="width: 42%">
+                                        <span>Top 3: 42%</span>
+                                    </div>
+                                </div>
+                                <div class="concentration-desc">
+                                    中等集中 — 头部不垄断，但有明显优势
+                                </div>
+                            </div>
+
+                            <!-- 玩家分层 -->
+                            <div class="player-tiers">
+                                <div class="tier-item">
+                                    <div class="tier-header">
+                                        <span class="tier-name">🏆 头部 (Top 5)</span>
+                                        <span class="tier-share">占 58% 播放</span>
+                                    </div>
+                                    <div class="tier-desc">订阅 2万+，均播 10万+，更新稳定</div>
+                                    <div class="tier-insight">特点：极度垂直、高频更新</div>
+                                </div>
+                                <div class="tier-item">
+                                    <div class="tier-header">
+                                        <span class="tier-name">📈 腰部 (6-20名)</span>
+                                        <span class="tier-share">占 25% 播放</span>
+                                    </div>
+                                    <div class="tier-desc">订阅 5千-2万，均播 3-10万</div>
+                                    <div class="tier-insight">特点：偶有爆款，定位不够清晰</div>
+                                </div>
+                                <div class="tier-item highlight">
+                                    <div class="tier-header">
+                                        <span class="tier-name">🌱 长尾 (20名后)</span>
+                                        <span class="tier-share">占 17% 播放</span>
+                                    </div>
+                                    <div class="tier-desc">131 个频道，大多数订阅 < 5千</div>
+                                    <div class="tier-insight opportunity">机会：长尾玩家很多但质量参差，有差异化空间</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="conclusion-box" style="margin-top: 16px;">
+                            <div class="conclusion-title">新人切入建议</div>
+                            <div class="conclusion-text">
+                                头部玩家虽然强，但 <strong>不是垄断局面</strong>。近 90 天有 <strong>8 个新频道</strong>进入前 50 名。
+                                关键是找到<strong>差异化定位</strong>，不要和头部硬碰硬。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 内容类型对比 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div>
+                            <div class="detail-title" id="opportunityTitle">内容类型天花板</div>
+                            <div class="detail-subtitle" id="opportunitySubtitle">不同类型内容的播放量潜力差异</div>
+                        </div>
+                    </div>
+                    <div class="detail-body">
+                        <!-- 时间对比 -->
+                        <div class="time-compare">
+                            <span class="time-compare-label">vs 上一个90天：</span>
+                            <span class="time-compare-value up">食疗类增长 23%</span>
+                            <span class="time-compare-label" style="margin-left: 16px;">讲座类</span>
+                            <span class="time-compare-value down">下降 8%</span>
+                        </div>
+
+                        <div class="chart-container">
+                            <canvas id="mainChart"></canvas>
+                        </div>
+
+                        <div class="conclusion-box">
+                            <div class="conclusion-title">核心发现</div>
+                            <div class="conclusion-text" id="conclusionText">
+                                <strong>食疗养生</strong>类内容平均播放量最高（8.2万），是养生讲座的 <strong>2.9倍</strong>。
+                                而且近90天增长了23%，趋势向好。建议优先选择食疗类高天花板赛道。
+                            </div>
+                            <div class="action-list" id="actionList">
+                                <span class="action-item do">优先做食疗养生</span>
+                                <span class="action-item do">功法教学也不错</span>
+                                <span class="action-item avoid">避免纯理论内容</span>
+                            </div>
+                        </div>
+
+                        <!-- 推理链折叠面板 -->
+                        <div class="reasoning-panel" id="reasoningPanel">
+                            <div class="reasoning-toggle" onclick="toggleReasoning('reasoningPanel')">
+                                <span class="reasoning-toggle-text">
+                                    <span>🔍</span>
+                                    <span>展开看推理过程（数据 → 方法 → 结论）</span>
+                                </span>
+                                <span class="reasoning-toggle-icon">▼</span>
+                            </div>
+                            <div class="reasoning-content">
+                                <!-- 原始数据 -->
+                                <div class="reasoning-section">
+                                    <div class="reasoning-section-title">
+                                        <span class="icon">📊</span>
+                                        <span>原始数据</span>
+                                    </div>
+                                    <table class="compact-table">
+                                        <thead>
+                                            <tr>
+                                                <th>内容类型</th>
+                                                <th>视频数</th>
+                                                <th>平均播放</th>
+                                                <th>最高播放</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>食疗养生</td>
+                                                <td>423</td>
+                                                <td style="color: #22c55e; font-weight: 600;">8.2万</td>
+                                                <td>186万</td>
+                                            </tr>
+                                            <tr>
+                                                <td>功法教学</td>
+                                                <td>312</td>
+                                                <td>6.5万</td>
+                                                <td>98万</td>
+                                            </tr>
+                                            <tr>
+                                                <td>穴位按摩</td>
+                                                <td>567</td>
+                                                <td>4.8万</td>
+                                                <td>72万</td>
+                                            </tr>
+                                            <tr>
+                                                <td>养生讲座</td>
+                                                <td>845</td>
+                                                <td style="color: #64748b;">2.8万</td>
+                                                <td>45万</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="data-source">
+                                        <span class="data-source-dot"></span>
+                                        <span>数据来源：2147个视频，156个频道，近90天</span>
+                                    </div>
+                                </div>
+
+                                <!-- 分析方法 -->
+                                <div class="reasoning-section">
+                                    <div class="reasoning-section-title">
+                                        <span class="icon">🔬</span>
+                                        <span>分析方法</span>
+                                    </div>
+                                    <div class="method-box">
+                                        1. 对所有视频按<code>内容类型</code>分组<br>
+                                        2. 计算每组的<code>平均播放量</code>和<code>最高播放量</code><br>
+                                        3. 比较各组之间的差异倍数<br>
+                                        4. 结合样本量判断结论可靠性
+                                    </div>
+                                </div>
+
+                                <!-- 推理链 -->
+                                <div class="reasoning-section">
+                                    <div class="reasoning-section-title">
+                                        <span class="icon">🔗</span>
+                                        <span>推理链</span>
+                                    </div>
+                                    <div class="reasoning-chain">
+                                        <div class="chain-step">
+                                            <div class="chain-connector">
+                                                <div class="chain-dot"></div>
+                                                <div class="chain-line"></div>
+                                            </div>
+                                            <div class="chain-content">
+                                                <div class="chain-label">观察 1</div>
+                                                <div class="chain-value">食疗养生类平均播放量 = <strong>8.2万</strong></div>
+                                            </div>
+                                        </div>
+                                        <div class="chain-step">
+                                            <div class="chain-connector">
+                                                <div class="chain-dot"></div>
+                                                <div class="chain-line"></div>
+                                            </div>
+                                            <div class="chain-content">
+                                                <div class="chain-label">观察 2</div>
+                                                <div class="chain-value">养生讲座类平均播放量 = <strong>2.8万</strong></div>
+                                            </div>
+                                        </div>
+                                        <div class="chain-step">
+                                            <div class="chain-connector">
+                                                <div class="chain-dot"></div>
+                                                <div class="chain-line"></div>
+                                            </div>
+                                            <div class="chain-content">
+                                                <div class="chain-label">计算</div>
+                                                <div class="chain-value">8.2 ÷ 2.8 = <strong>2.93倍</strong></div>
+                                            </div>
+                                        </div>
+                                        <div class="chain-step">
+                                            <div class="chain-connector">
+                                                <div class="chain-dot conclusion"></div>
+                                            </div>
+                                            <div class="chain-content">
+                                                <div class="chain-label">结论</div>
+                                                <div class="chain-value highlight">食疗内容天花板是讲座的 2.9 倍</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 置信度 -->
+                                <div class="reasoning-section">
+                                    <div class="reasoning-section-title">
+                                        <span class="icon">📈</span>
+                                        <span>置信度评估</span>
+                                    </div>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-track">
+                                            <div class="confidence-fill high" style="width: 85%"></div>
+                                        </div>
+                                        <div class="confidence-text">
+                                            <strong>85%</strong> 高置信度
+                                        </div>
+                                    </div>
+                                    <div class="method-box" style="margin-top: 12px;">
+                                        置信度依据：<br>
+                                        • 样本量充足：食疗类 423 个视频（>100 为高）<br>
+                                        • 差异显著：2.9倍差距明显（>2倍为显著）<br>
+                                        • 趋势一致：近3个月持续增长
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 趋势图 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">趋势变化</div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="charts-grid">
+                            <div class="chart-box">
+                                <div class="chart-title">各类型播放量趋势</div>
+                                <div class="chart-container">
+                                    <canvas id="trendChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-box">
+                                <div class="chart-title">竞争格局变化</div>
+                                <div class="chart-container">
+                                    <canvas id="competitionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 玩家详情视图 -->
+            <div id="playerView" style="display: none;">
+                <!-- 基本面 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div>
+                            <div class="detail-title" id="playerName">laxnetcm</div>
+                            <div class="detail-subtitle" id="playerSubtitle">养生赛道 · 食疗方向 · 头部黑马</div>
+                        </div>
+                        <span id="playerRankBadge" style="background: #f59e0b; color: #0f172a; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Top 1</span>
+                    </div>
+                    <div class="detail-body">
+                        <!-- 核心数据 -->
+                        <div class="player-stats-grid">
+                            <div class="player-stat-item">
+                                <div class="player-stat-value">2.3万</div>
+                                <div class="player-stat-label">订阅</div>
+                            </div>
+                            <div class="player-stat-item">
+                                <div class="player-stat-value highlight">50.5万</div>
+                                <div class="player-stat-label">均播</div>
+                                <div class="player-stat-compare">行业均值的 6.8 倍</div>
+                            </div>
+                            <div class="player-stat-item">
+                                <div class="player-stat-value">24个</div>
+                                <div class="player-stat-label">视频</div>
+                            </div>
+                            <div class="player-stat-item">
+                                <div class="player-stat-value">8个月</div>
+                                <div class="player-stat-label">运营时长</div>
+                                <div class="player-stat-compare">2024.05 开始</div>
+                            </div>
+                        </div>
+
+                        <!-- 为什么值得研究 -->
+                        <div class="conclusion-box" style="margin-top: 20px;">
+                            <div class="conclusion-title">为什么值得研究？</div>
+                            <div class="conclusion-text">
+                                <strong>laxnetcm</strong> 是养生赛道的<strong>头部黑马</strong>。
+                                仅用 <strong>2.3 万订阅</strong>就做到了 <strong>50.5 万均播</strong>（是行业均值的 6.8 倍）。
+                                他在 <strong>8 个月内</strong>从 0 起步进入头部行列，增长路径清晰，模式可复制。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成长轨迹 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">成长轨迹</div>
+                        <div class="detail-subtitle">关键节点和决策</div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot start"></div>
+                                <div class="timeline-date">2024.05</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">起步探索期</div>
+                                    <div class="timeline-desc">开始发视频，尝试多种内容类型（讲座、穴位、食疗）</div>
+                                    <div class="timeline-data">订阅：0 → 500</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot milestone"></div>
+                                <div class="timeline-date">2024.07</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">第一个爆款 💥</div>
+                                    <div class="timeline-desc">「这碗绿豆汤，降火效果惊人」获得 45 万播放，发现食疗类有潜力</div>
+                                    <div class="timeline-data">订阅：500 → 3000</div>
+                                    <div class="timeline-decision">
+                                        <span class="decision-label">关键决策：</span>
+                                        <span class="decision-text">放弃讲座类，全力押注食疗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">2024.09</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">模式确立期</div>
+                                    <div class="timeline-desc">确立「功效标题 + 食材封面」模式，更新频率提升到每 3 天一个</div>
+                                    <div class="timeline-data">订阅：3000 → 8000</div>
+                                    <div class="timeline-decision">
+                                        <span class="decision-label">关键决策：</span>
+                                        <span class="decision-text">标题从「知识型」改为「功效型」</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot milestone"></div>
+                                <div class="timeline-date">2024.11</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">爆发增长期 🚀</div>
+                                    <div class="timeline-desc">连续 3 个爆款（降血压、减肥、失眠），进入赛道 Top 5</div>
+                                    <div class="timeline-data">订阅：8000 → 1.5万</div>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot current"></div>
+                                <div class="timeline-date">2025.01</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">现在：头部玩家</div>
+                                    <div class="timeline-desc">稳定在赛道 Top 1，均播持续增长</div>
+                                    <div class="timeline-data">订阅：2.3万 · 均播 50.5万</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 细分话题分布 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">内容结构分析</div>
+                        <div class="detail-subtitle">他做什么话题、哪个最有效</div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="content-structure">
+                            <div class="structure-header">
+                                <div class="structure-category">
+                                    <span class="category-icon">🍲</span>
+                                    <span class="category-name">食疗养生</span>
+                                    <span class="category-badge">100% 垂直</span>
+                                </div>
+                            </div>
+                            <div class="structure-body">
+                                <div class="topic-list">
+                                    <div class="topic-item best">
+                                        <div class="topic-bar" style="width: 100%"></div>
+                                        <div class="topic-info">
+                                            <span class="topic-name">降血压食谱</span>
+                                            <span class="topic-badge best">主力话题</span>
+                                        </div>
+                                        <div class="topic-stats">
+                                            <span class="topic-count">8个视频</span>
+                                            <span class="topic-ratio">33%</span>
+                                            <span class="topic-views">贡献 45% 播放量</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-item good">
+                                        <div class="topic-bar" style="width: 75%"></div>
+                                        <div class="topic-info">
+                                            <span class="topic-name">减肥食疗</span>
+                                            <span class="topic-badge good">高效话题</span>
+                                        </div>
+                                        <div class="topic-stats">
+                                            <span class="topic-count">6个视频</span>
+                                            <span class="topic-ratio">25%</span>
+                                            <span class="topic-views">贡献 25% 播放量</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-item">
+                                        <div class="topic-bar" style="width: 60%"></div>
+                                        <div class="topic-info">
+                                            <span class="topic-name">失眠调理</span>
+                                        </div>
+                                        <div class="topic-stats">
+                                            <span class="topic-count">5个视频</span>
+                                            <span class="topic-ratio">21%</span>
+                                            <span class="topic-views">贡献 18% 播放量</span>
+                                        </div>
+                                    </div>
+                                    <div class="topic-item">
+                                        <div class="topic-bar" style="width: 45%"></div>
+                                        <div class="topic-info">
+                                            <span class="topic-name">其他（祛湿、养胃等）</span>
+                                        </div>
+                                        <div class="topic-stats">
+                                            <span class="topic-count">5个视频</span>
+                                            <span class="topic-ratio">21%</span>
+                                            <span class="topic-views">贡献 12% 播放量</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="topic-insight">
+                                    <div class="insight-icon">💡</div>
+                                    <div class="insight-text">
+                                        <strong>降血压 + 减肥</strong>两个话题占视频数的 58%，但贡献了 <strong>70%</strong> 的播放量。
+                                        <br>→ 新人切入建议：从<strong>降血压食谱</strong>开始，这是验证过的爆款话题。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成功模式总结 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">成功模式总结</div>
+                    </div>
+                    <div class="detail-body">
+                        <div class="pattern-summary">
+                            <div class="pattern-item">
+                                <div class="pattern-number">1</div>
+                                <div class="pattern-content">
+                                    <div class="pattern-title">极度垂直</div>
+                                    <div class="pattern-desc">只做食疗，不碰其他类型。细分聚焦「降血压」「减肥」两个话题。</div>
+                                    <div class="pattern-evidence">证据：24个视频 100% 食疗，无例外</div>
+                                </div>
+                            </div>
+                            <div class="pattern-item">
+                                <div class="pattern-number">2</div>
+                                <div class="pattern-content">
+                                    <div class="pattern-title">高频更新</div>
+                                    <div class="pattern-desc">每 3 天一个视频，是行业均值的 2.3 倍。以量换曝光机会。</div>
+                                    <div class="pattern-evidence">证据：8个月发了24个视频，平均10天3个</div>
+                                </div>
+                            </div>
+                            <div class="pattern-item">
+                                <div class="pattern-number">3</div>
+                                <div class="pattern-content">
+                                    <div class="pattern-title">功效标题</div>
+                                    <div class="pattern-desc">标题直接说效果（降血压、瘦10斤），不说理论。吸引点击。</div>
+                                    <div class="pattern-evidence">证据：爆款标题都是功效型，如「这碗汤喝一周，血压降下来了」</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="conclusion-box" style="margin-top: 20px;">
+                            <div class="conclusion-title">新人可学习的路径</div>
+                            <div class="conclusion-text">
+                                <strong>第一步：</strong>选一个细分话题（如降血压食谱）<br>
+                                <strong>第二步：</strong>高频输出（每周2-3个）<br>
+                                <strong>第三步：</strong>用功效标题测试，找到有效的内容模式<br>
+                                <strong>第四步：</strong>发现爆款话题后，全力押注
+                            </div>
+                            <div class="action-list">
+                                <span class="action-item do">从降血压食谱切入</span>
+                                <span class="action-item do">标题直接说功效</span>
+                                <span class="action-item do">保持高频更新</span>
+                                <span class="action-item avoid">不要贪多做杂</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 爆款视频分析 -->
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">爆款视频分析</div>
+                        <div class="detail-subtitle">学习他的标题和选题规律</div>
+                    </div>
+                    <div class="detail-body" style="padding: 16px;">
+                        <div class="video-list">
+                            <div class="video-item">
+                                <div class="video-rank">1</div>
+                                <div class="video-content">
+                                    <div class="video-title">这碗汤喝一周，血压降下来了</div>
+                                    <div class="video-meta">
+                                        <span class="video-views">186万播放</span>
+                                        <span class="video-date">2025-01-10</span>
+                                        <span class="video-topic">降血压</span>
+                                    </div>
+                                    <div class="video-analysis">
+                                        <span class="analysis-tag">功效标题</span>
+                                        <span class="analysis-tag">时间承诺（一周）</span>
+                                        <span class="analysis-tag">具体效果</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="video-item">
+                                <div class="video-rank">2</div>
+                                <div class="video-content">
+                                    <div class="video-title">早上空腹吃这个，一个月瘦10斤</div>
+                                    <div class="video-meta">
+                                        <span class="video-views">142万播放</span>
+                                        <span class="video-date">2025-01-05</span>
+                                        <span class="video-topic">减肥</span>
+                                    </div>
+                                    <div class="video-analysis">
+                                        <span class="analysis-tag">功效标题</span>
+                                        <span class="analysis-tag">数字量化（10斤）</span>
+                                        <span class="analysis-tag">时间点（早上空腹）</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="video-item">
+                                <div class="video-rank">3</div>
+                                <div class="video-content">
+                                    <div class="video-title">失眠的人一定要试试这个方子</div>
+                                    <div class="video-meta">
+                                        <span class="video-views">98万播放</span>
+                                        <span class="video-date">2024-12-28</span>
+                                        <span class="video-topic">失眠</span>
+                                    </div>
+                                    <div class="video-analysis">
+                                        <span class="analysis-tag">痛点人群（失眠的人）</span>
+                                        <span class="analysis-tag">行动号召（一定要试）</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="topic-insight" style="margin-top: 16px;">
+                            <div class="insight-icon">📝</div>
+                            <div class="insight-text">
+                                <strong>标题规律：</strong>功效明确 + 时间/数字量化 + 行动号召<br>
+                                <strong>可复用模板：</strong>「[时间/方法] + [具体效果/数字]」如「每天喝这个，一周见效」
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colors = {
+            cyan: '#06b6d4',
+            green: '#22c55e',
+            yellow: '#f59e0b',
+            purple: '#a855f7',
+            red: '#ef4444',
+            gray: '#64748b'
+        };
+
+        let currentDays = 90;
+        let mainChart, trendChart, competitionChart;
+
+        // 模拟不同时间段的数据
+        const timeData = {
+            7: {
+                views: '3200万',
+                viewsChange: '↑ 18% vs 上期',
+                channels: 89,
+                channelsChange: '↑ 3 个新入场',
+                competition: '低',
+                competitionClass: 'good',
+                competitionChange: 'Top3 占 35%',
+                score: 85,
+                scoreChange: '↑ 8 vs 上期',
+                dateRange: '2025.01.17 - 2025.01.24',
+                opportunities: [
+                    { title: '「春节养生」话题爆发', desc: '搜索量增长 180%', isNew: true },
+                    { title: '短视频(<5分钟)表现更好', desc: '完播率高 40%', isNew: false }
+                ],
+                contentTypeData: [12.5, 8.2, 5.1, 2.2]
+            },
+            30: {
+                views: '8500万',
+                viewsChange: '↑ 15% vs 上期',
+                channels: 124,
+                channelsChange: '↑ 5 个新入场',
+                competition: '中等',
+                competitionClass: 'warning',
+                competitionChange: 'Top3 占 40%',
+                score: 80,
+                scoreChange: '↑ 6 vs 上期',
+                dateRange: '2024.12.25 - 2025.01.24',
+                opportunities: [
+                    { title: '食疗内容持续增长', desc: '平均播放 9.1万，增长 15%', isNew: false },
+                    { title: '新人入场窗口期', desc: '头部玩家更新频率下降', isNew: true }
+                ],
+                contentTypeData: [9.1, 7.0, 5.2, 2.5]
+            },
+            90: {
+                views: '2.1亿',
+                viewsChange: '↑ 12% vs 上期',
+                channels: 156,
+                channelsChange: '↑ 8 个新入场',
+                competition: '中等',
+                competitionClass: 'warning',
+                competitionChange: 'Top3 占 42%',
+                score: 78,
+                scoreChange: '↑ 5 vs 上期',
+                dateRange: '2024.10.27 - 2025.01.24',
+                opportunities: [
+                    { title: '食疗内容天花板最高', desc: '平均播放 8.2万，是讲座类的 2.9 倍', isNew: true },
+                    { title: '周末发布竞争少', desc: '发布量少 40%，但播放差不多', isNew: false },
+                    { title: '2个黑马频道值得研究', desc: '爆发倍率超过 500 倍', isNew: false }
+                ],
+                contentTypeData: [8.2, 6.5, 4.8, 2.8]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+        });
+
+        function initCharts() {
+            // 主图表：内容类型对比
+            mainChart = new Chart(document.getElementById('mainChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['食疗养生', '功法教学', '穴位按摩', '养生讲座'],
+                    datasets: [{
+                        label: '平均播放量(万)',
+                        data: timeData[90].contentTypeData,
+                        backgroundColor: [colors.green, colors.cyan, colors.yellow, colors.gray],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#334155' }, ticks: { color: colors.gray } },
+                        y: { grid: { display: false }, ticks: { color: '#e2e8f0' } }
+                    }
+                }
+            });
+
+            // 趋势图
+            trendChart = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12'],
+                    datasets: [
+                        {
+                            label: '食疗养生',
+                            data: [6.5, 6.8, 7.2, 7.5, 7.8, 7.6, 8.0, 8.1, 7.9, 8.2, 8.5, 8.2],
+                            borderColor: colors.green,
+                            tension: 0.4,
+                            fill: false
+                        },
+                        {
+                            label: '养生讲座',
+                            data: [3.2, 3.1, 3.0, 2.9, 2.8, 2.9, 2.7, 2.8, 2.6, 2.8, 2.7, 2.8],
+                            borderColor: colors.gray,
+                            tension: 0.4,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { color: colors.gray, boxWidth: 12 } }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: colors.gray } },
+                        y: { grid: { color: '#334155' }, ticks: { color: colors.gray } }
+                    }
+                }
+            });
+
+            // 竞争格局
+            competitionChart = new Chart(document.getElementById('competitionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Top3', '4-10名', '其他'],
+                    datasets: [{
+                        data: [42, 28, 30],
+                        backgroundColor: [colors.yellow, colors.cyan, colors.green],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { color: colors.gray, boxWidth: 12 } }
+                    }
+                }
+            });
+        }
+
+        function switchTime(days) {
+            currentDays = days;
+
+            // 更新按钮状态
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const data = timeData[days];
+
+            // 更新指标
+            document.getElementById('metricViews').textContent = data.views;
+            document.getElementById('metricViewsChange').textContent = data.viewsChange;
+            document.getElementById('metricChannels').textContent = data.channels;
+            document.getElementById('metricChannelsChange').textContent = data.channelsChange;
+            document.getElementById('metricCompetition').textContent = data.competition;
+            document.getElementById('metricCompetition').className = 'metric-value ' + data.competitionClass;
+            document.getElementById('metricCompetitionChange').textContent = data.competitionChange;
+            document.getElementById('metricScore').textContent = data.score;
+            document.getElementById('metricScoreChange').textContent = data.scoreChange;
+            document.getElementById('timeRangeText').textContent = data.dateRange;
+
+            // 更新机会列表
+            const opportunityList = document.getElementById('opportunityList');
+            opportunityList.innerHTML = data.opportunities.map((opp, i) => `
+                <div class="opportunity-card ${i === 0 ? 'selected' : ''}" onclick="showOpportunity(this, 'opp${i}')">
+                    <div class="opportunity-title">
+                        ${opp.title}
+                        ${opp.isNew ? '<span class="opportunity-new">新发现</span>' : ''}
+                    </div>
+                    <div class="opportunity-desc">${opp.desc}</div>
+                </div>
+            `).join('');
+
+            // 更新图表
+            mainChart.data.datasets[0].data = data.contentTypeData;
+            mainChart.update();
+
+            // 显示机会视图
+            document.getElementById('opportunityView').style.display = 'block';
+            document.getElementById('playerView').style.display = 'none';
+            document.querySelectorAll('.player-item').forEach(el => el.classList.remove('selected'));
+        }
+
+        function showOpportunity(element, type) {
+            document.querySelectorAll('.opportunity-card').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.player-item').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+
+            document.getElementById('opportunityView').style.display = 'block';
+            document.getElementById('playerView').style.display = 'none';
+        }
+
+        function selectPlayer(element, playerId) {
+            document.querySelectorAll('.player-item').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.opportunity-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+
+            document.getElementById('opportunityView').style.display = 'none';
+            document.getElementById('playerView').style.display = 'block';
+            document.getElementById('playerName').textContent = element.querySelector('.player-name').textContent;
+        }
+
+        function toggleReasoning(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创作者助手 - 直接给你答案</title>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* 顶部搜索区 */
+        .header {
+            text-align: center;
+            padding: 40px 20px 30px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #06b6d4;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 1em;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            max-width: 500px;
+            margin: 24px auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            color: white;
+            font-size: 1em;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #06b6d4;
+        }
+
+        .search-btn {
+            padding: 14px 28px;
+            background: #06b6d4;
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #22d3ee;
+            transform: translateY(-2px);
+        }
+
+        .search-btn:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-tags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .quick-tag {
+            padding: 6px 14px;
+            background: #334155;
+            color: #94a3b8;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-tag:hover {
+            background: #475569;
+            color: white;
+        }
+
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #334155;
+            border-top: 3px solid #06b6d4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 数据基数提示 */
+        .data-basis {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85em;
+            margin-bottom: 24px;
+        }
+
+        /* 模块卡片 */
+        .modules {
+            display: grid;
+            gap: 24px;
+        }
+
+        .module {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.1), transparent);
+            border-bottom: 1px solid #334155;
+        }
+
+        .module-icon {
+            font-size: 1.5em;
+        }
+
+        .module-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .module-subtitle {
+            font-size: 0.8em;
+            color: #64748b;
+            margin-left: auto;
+        }
+
+        .module-body {
+            padding: 20px;
+        }
+
+        /* 选题推荐 */
+        .topic-card {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .topic-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .topic-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #22d3ee;
+            margin-bottom: 8px;
+        }
+
+        .topic-reason {
+            font-size: 0.9em;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .topic-reference {
+            font-size: 0.85em;
+            color: #64748b;
+            padding: 8px 12px;
+            background: #1e293b;
+            border-radius: 6px;
+            border-left: 3px solid #06b6d4;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            margin-left: 8px;
+        }
+
+        .confidence-high { background: #22c55e20; color: #22c55e; }
+        .confidence-medium { background: #eab30820; color: #eab308; }
+        .confidence-low { background: #64748b20; color: #64748b; }
+
+        /* 爆款学习 */
+        .viral-video {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: transform 0.2s;
+        }
+
+        .viral-video:hover {
+            transform: translateX(4px);
+        }
+
+        .viral-thumbnail {
+            width: 160px;
+            height: 90px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #334155;
+            flex-shrink: 0;
+        }
+
+        .viral-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .viral-title {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .viral-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .viral-title a:hover {
+            color: #06b6d4;
+        }
+
+        .viral-channel {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .viral-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .learning-points {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .learning-tag {
+            padding: 3px 8px;
+            background: #06b6d420;
+            color: #22d3ee;
+            border-radius: 4px;
+            font-size: 0.75em;
+        }
+
+        /* 标题助手 */
+        .keyword-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .keyword-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+
+        .keyword-word {
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .keyword-views {
+            font-size: 0.85em;
+            color: #22c55e;
+        }
+
+        .template-list {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .template-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .template-item:last-child {
+            border-bottom: none;
+        }
+
+        .template-formula {
+            font-weight: 500;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .template-example {
+            font-size: 0.85em;
+            color: #64748b;
+        }
+
+        /* 学习对象（频道榜单）*/
+        .ranking-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .ranking-tab {
+            padding: 8px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 0.9em;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .ranking-tab:hover {
+            border-color: #06b6d4;
+            color: #e2e8f0;
+        }
+
+        .ranking-tab.active {
+            background: #06b6d4;
+            border-color: #06b6d4;
+            color: #0f172a;
+        }
+
+        .channel-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .channel-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 12px;
+        }
+
+        .channel-rank {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #334155;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .channel-rank.top-1 { background: #fbbf2420; color: #fbbf24; }
+        .channel-rank.top-2 { background: #94a3b820; color: #94a3b8; }
+        .channel-rank.top-3 { background: #cd7f3220; color: #cd7f32; }
+
+        .channel-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-name {
+            font-weight: 500;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .channel-name a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .channel-name a:hover {
+            color: #06b6d4;
+        }
+
+        .channel-why {
+            font-size: 0.85em;
+            color: #64748b;
+        }
+
+        .channel-stats {
+            text-align: right;
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .channel-expand-btn {
+            background: none;
+            border: 1px solid #334155;
+            color: #64748b;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .channel-expand-btn:hover {
+            border-color: #06b6d4;
+            color: #06b6d4;
+        }
+
+        /* 频道详细分析面板 */
+        .channel-analysis {
+            margin-top: 12px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 8px;
+            border-left: 3px solid #06b6d4;
+            display: none;
+        }
+
+        .channel-analysis.show {
+            display: block;
+        }
+
+        .analysis-section {
+            margin-bottom: 16px;
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-section h5 {
+            color: #94a3b8;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .analysis-conclusion {
+            color: #22d3ee;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .analysis-data-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .analysis-data-item {
+            padding: 4px 10px;
+            background: #1e293b;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .analysis-formula {
+            font-size: 0.85em;
+            color: #64748b;
+            font-style: italic;
+            padding: 8px 12px;
+            background: #1e293b;
+            border-radius: 4px;
+        }
+
+        .strength-item, .weakness-item {
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .strength-item {
+            background: linear-gradient(90deg, #22c55e10, transparent);
+            border-left: 3px solid #22c55e;
+        }
+
+        .weakness-item {
+            background: linear-gradient(90deg, #eab30810, transparent);
+            border-left: 3px solid #eab308;
+        }
+
+        .strength-item .point, .weakness-item .point {
+            font-weight: 500;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .strength-item .data, .weakness-item .data {
+            font-size: 0.85em;
+            color: #94a3b8;
+            margin-bottom: 2px;
+        }
+
+        .strength-item .reasoning, .weakness-item .reasoning {
+            font-size: 0.8em;
+            color: #64748b;
+        }
+
+        /* 排名公式说明 */
+        .ranking-formula {
+            font-size: 0.8em;
+            color: #64748b;
+            font-style: italic;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background: #0f172a;
+            border-radius: 6px;
+        }
+
+        /* 推理链可视化样式 */
+        .reasoning-chain {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+            border: 1px solid #334155;
+        }
+
+        .reasoning-chain-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 16px;
+        }
+
+        .reasoning-chain-header h4 {
+            color: #06b6d4;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reasoning-chain-toggle {
+            color: #64748b;
+            font-size: 0.85em;
+        }
+
+        /* 推理步骤流程 */
+        .reasoning-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .reasoning-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .step-line {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, #06b6d4, transparent);
+        }
+
+        .step-content {
+            flex: 1;
+            padding-bottom: 8px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .step-detail {
+            color: #94a3b8;
+            font-size: 0.9em;
+            padding: 12px;
+            background: #1e293b;
+            border-radius: 8px;
+            border-left: 3px solid #06b6d4;
+        }
+
+        .step-data-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .step-data-item {
+            padding: 4px 10px;
+            background: #334155;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #22d3ee;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .chart-title {
+            color: #94a3b8;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 280px;
+            max-width: 100%;
+        }
+
+        /* 对比表格 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 0.9em;
+        }
+
+        .comparison-table th {
+            background: #334155;
+            color: #e2e8f0;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .comparison-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #334155;
+            color: #94a3b8;
+        }
+
+        .comparison-table tr:hover td {
+            background: #1e293b;
+        }
+
+        .comparison-table .highlight {
+            color: #22c55e;
+            font-weight: 500;
+        }
+
+        .comparison-table .warning {
+            color: #eab308;
+        }
+
+        /* 指标对比条 */
+        .metric-bar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .metric-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .metric-bar-label {
+            width: 100px;
+            font-size: 0.85em;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .metric-bar-track {
+            flex: 1;
+            height: 20px;
+            background: #334155;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4, #22d3ee);
+            border-radius: 10px;
+            transition: width 0.5s ease-out;
+        }
+
+        .metric-bar-value {
+            width: 80px;
+            text-align: right;
+            font-size: 0.85em;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        /* 频道雷达图包装器 */
+        .channel-radar-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .channel-radar-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 展开/收起动画 */
+        .collapsible-content {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .collapsible-content.expanded {
+            max-height: 2000px;
+        }
+
+        /* 数据流向指示器 */
+        .data-flow-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .flow-icon {
+            font-size: 1.5em;
+        }
+
+        .flow-label {
+            font-size: 0.75em;
+            color: #64748b;
+        }
+
+        .flow-arrow {
+            color: #06b6d4;
+            font-size: 1.2em;
+        }
+
+        /* 避坑提醒 */
+        .warning-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .warning-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .warning-item.high {
+            background: linear-gradient(90deg, #ef444420, transparent);
+            border: 1px solid #ef444440;
+        }
+
+        .warning-item.medium {
+            background: linear-gradient(90deg, #eab30820, transparent);
+            border: 1px solid #eab30840;
+        }
+
+        .warning-item.low {
+            background: linear-gradient(90deg, #22c55e20, transparent);
+            border: 1px solid #22c55e40;
+        }
+
+        .warning-icon {
+            font-size: 1.5em;
+        }
+
+        .warning-content h4 {
+            font-size: 1em;
+            color: #f1f5f9;
+            margin-bottom: 4px;
+        }
+
+        .warning-content p {
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+
+        /* 返回链接 */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+        }
+
+        .back-link:hover {
+            color: #06b6d4;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .viral-video {
+                flex-direction: column;
+            }
+
+            .viral-thumbnail {
+                width: 100%;
+                height: 180px;
+            }
+
+            .keyword-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">&larr; 返回完整版</a>
+
+        <header class="header">
+            <h1>创作者助手</h1>
+            <p>直接给你答案，不用自己分析</p>
+
+            <div class="search-box">
+                <input type="text" class="search-input" id="themeInput" placeholder="输入你想做的领域，如：养生" value="养生">
+                <button class="search-btn" id="searchBtn" onclick="loadData()">开始分析</button>
+            </div>
+
+            <div class="quick-tags">
+                <button class="quick-tag" onclick="setTheme('养生')">养生</button>
+                <button class="quick-tag" onclick="setTheme('科技')">科技</button>
+                <button class="quick-tag" onclick="setTheme('美食')">美食</button>
+                <button class="quick-tag" onclick="setTheme('旅行')">旅行</button>
+                <button class="quick-tag" onclick="setTheme('理财')">理财</button>
+            </div>
+        </header>
+
+        <div id="content">
+            <div class="empty-state">
+                <p>输入领域关键词，获取创作建议</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let currentRanking = 'total_views_rank';
+        let rankingData = null;
+
+        function setTheme(theme) {
+            document.getElementById('themeInput').value = theme;
+            loadData();
+        }
+
+        async function loadData() {
+            const theme = document.getElementById('themeInput').value.trim();
+            if (!theme) return;
+
+            const btn = document.getElementById('searchBtn');
+            const content = document.getElementById('content');
+
+            btn.disabled = true;
+            btn.textContent = '分析中...';
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在分析「${theme}」领域数据...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/creator-helper/${encodeURIComponent(theme)}`);
+                const data = await response.json();
+
+                if (data.status === 'ok') {
+                    renderModules(data);
+                } else {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <p>${data.message || '加载失败，请重试'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <p>网络错误，请检查服务器是否运行</p>
+                    </div>
+                `;
+            }
+
+            btn.disabled = false;
+            btn.textContent = '开始分析';
+        }
+
+        function renderModules(data) {
+            const m = data.modules;
+            rankingData = m.channel_rankings;
+
+            document.getElementById('content').innerHTML = `
+                <p class="data-basis">基于 ${data.data_basis.toLocaleString()} 个视频数据分析</p>
+
+                <div class="modules">
+                    <!-- 1. 选题助手 -->
+                    <div class="module">
+                        <div class="module-header">
+                            <span class="module-icon">💡</span>
+                            <span class="module-title">选题助手</span>
+                            <span class="module-subtitle">${m.topic_recommendations.data_source}</span>
+                        </div>
+                        <div class="module-body">
+                            ${renderTopicRecommendations(m.topic_recommendations)}
+                        </div>
+                    </div>
+
+                    <!-- 2. 爆款学习 -->
+                    <div class="module">
+                        <div class="module-header">
+                            <span class="module-icon">🔥</span>
+                            <span class="module-title">爆款学习</span>
+                            <span class="module-subtitle">${m.viral_learning.summary}</span>
+                        </div>
+                        <div class="module-body">
+                            ${renderViralLearning(m.viral_learning)}
+                        </div>
+                    </div>
+
+                    <!-- 3. 标题助手 -->
+                    <div class="module">
+                        <div class="module-header">
+                            <span class="module-icon">✏️</span>
+                            <span class="module-title">标题助手</span>
+                            <span class="module-subtitle">${m.title_helper.tip}</span>
+                        </div>
+                        <div class="module-body">
+                            ${renderTitleHelper(m.title_helper)}
+                        </div>
+                    </div>
+
+                    <!-- 4. 学习对象（频道榜单）-->
+                    <div class="module">
+                        <div class="module-header">
+                            <span class="module-icon">🎯</span>
+                            <span class="module-title">学习对象</span>
+                            <span class="module-subtitle">找到值得学习的频道</span>
+                        </div>
+                        <div class="module-body">
+                            ${renderChannelRankings(m.channel_rankings)}
+                        </div>
+                    </div>
+
+                    <!-- 5. 避坑提醒 -->
+                    <div class="module">
+                        <div class="module-header">
+                            <span class="module-icon">⚠️</span>
+                            <span class="module-title">避坑提醒</span>
+                            <span class="module-subtitle">重要的事说三遍</span>
+                        </div>
+                        <div class="module-body">
+                            ${renderWarnings(m.warnings)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTopicRecommendations(data) {
+            if (!data.today_picks || data.today_picks.length === 0) {
+                return '<p style="color: #64748b;">暂无推荐</p>';
+            }
+
+            return data.today_picks.map(pick => `
+                <div class="topic-card">
+                    <div class="topic-name">
+                        ${pick.topic}
+                        <span class="confidence-badge confidence-${pick.confidence === '高' ? 'high' : pick.confidence === '中' ? 'medium' : 'low'}">${pick.confidence}置信度</span>
+                    </div>
+                    <div class="topic-reason">${pick.reason}</div>
+                    <div class="topic-reference">参考标题：${pick.title_reference}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderViralLearning(data) {
+            if (!data.videos || data.videos.length === 0) {
+                return '<p style="color: #64748b;">暂无爆款视频</p>';
+            }
+
+            return data.videos.slice(0, 5).map(video => `
+                <div class="viral-video">
+                    <img class="viral-thumbnail"
+                         src="${video.thumbnail_url || ''}"
+                         alt="${video.title}"
+                         onerror="this.style.background='#334155'">
+                    <div class="viral-info">
+                        <div class="viral-title">
+                            <a href="https://www.youtube.com/watch?v=${video.youtube_id}" target="_blank">
+                                ${video.title}
+                            </a>
+                        </div>
+                        <div class="viral-channel">${video.channel_name || '未知频道'}</div>
+                        <div class="viral-stats">
+                            <span>📊 ${formatNumber(video.view_count)} 播放</span>
+                            <span>📈 日均 ${formatNumber(video.daily_views)}</span>
+                            <span>📅 ${video.days_old} 天前</span>
+                        </div>
+                        <div class="learning-points">
+                            ${video.learning_points.map(p => `<span class="learning-tag">${p}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTitleHelper(data) {
+            let html = '<h4 style="color: #94a3b8; font-size: 0.9em; margin-bottom: 12px;">高效关键词（平均播放量更高）</h4>';
+            html += '<div class="keyword-grid">';
+            data.efficient_keywords.slice(0, 8).forEach(kw => {
+                html += `
+                    <div class="keyword-item">
+                        <span class="keyword-word">${kw.keyword}</span>
+                        <span class="keyword-views">均 ${formatNumber(kw.avg_views)}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            html += '<h4 style="color: #94a3b8; font-size: 0.9em; margin-bottom: 12px; margin-top: 20px;">标题公式</h4>';
+            html += '<div class="template-list">';
+            data.title_templates.forEach(t => {
+                html += `
+                    <div class="template-item">
+                        <div class="template-formula">${t.template}</div>
+                        <div class="template-example">例：${t.example}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            return html;
+        }
+
+        function renderChannelRankings(data) {
+            const rankings = [
+                { key: 'total_views_rank', ...data.total_views_rank },
+                { key: 'avg_views_rank', ...data.avg_views_rank },
+                { key: 'video_count_rank', ...data.video_count_rank },
+                { key: 'dark_horse_rank', ...data.dark_horse_rank },
+                { key: 'efficiency_rank', ...data.efficiency_rank },
+            ];
+
+            // 数据流向指示器
+            let html = `
+                <div class="data-flow-indicator">
+                    <div class="flow-step">
+                        <span class="flow-icon">📊</span>
+                        <span class="flow-label">原始数据</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step">
+                        <span class="flow-icon">📐</span>
+                        <span class="flow-label">计算指标</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step">
+                        <span class="flow-icon">⚖️</span>
+                        <span class="flow-label">对比排序</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="flow-step">
+                        <span class="flow-icon">💡</span>
+                        <span class="flow-label">得出结论</span>
+                    </div>
+                </div>
+            `;
+
+            html += '<div class="ranking-tabs">';
+            rankings.forEach(r => {
+                html += `
+                    <button class="ranking-tab ${r.key === currentRanking ? 'active' : ''}"
+                            onclick="switchRanking('${r.key}')">
+                        ${r.emoji} ${r.title}
+                    </button>
+                `;
+            });
+            html += '</div>';
+
+            html += `<p style="color: #64748b; font-size: 0.85em; margin-bottom: 8px;" id="rankingDesc">
+                ${data[currentRanking].description}
+            </p>`;
+
+            html += `<div class="ranking-formula" id="rankingFormula">
+                <strong>计算公式：</strong>${data[currentRanking].ranking_formula || ''}
+            </div>`;
+
+            // 添加对比图表
+            html += `
+                <div class="chart-container" id="rankingChartContainer">
+                    <div class="chart-title">频道指标对比图</div>
+                    <div class="chart-wrapper">
+                        <canvas id="rankingBarChart"></canvas>
+                    </div>
+                </div>
+            `;
+
+            html += '<div class="channel-list" id="channelList">';
+            html += renderChannelList(data[currentRanking].channels);
+            html += '</div>';
+
+            // 延迟初始化图表
+            setTimeout(() => initRankingChart(data[currentRanking].channels, currentRanking), 100);
+
+            return html;
+        }
+
+        // 图表实例
+        let rankingChart = null;
+        const CHART_DISPLAY_LIMIT = 100;  // 图表展示 Top 100（大样本可视化）
+
+        function initRankingChart(channels, rankType) {
+            const canvas = document.getElementById('rankingBarChart');
+            if (!canvas || !channels || channels.length === 0) return;
+
+            // 销毁旧图表
+            if (rankingChart) {
+                rankingChart.destroy();
+            }
+
+            const displayLimit = Math.min(channels.length, CHART_DISPLAY_LIMIT);
+
+            // 100+ 数据全部使用散点图可视化，更适合大数据量分析
+            rankingChart = createScatterChartForAll(canvas, channels.slice(0, displayLimit), rankType);
+        }
+
+        function createBarChart(canvas, channels, rankType) {
+            const labels = channels.map((c, i) => `${i+1}. ${c.channel_name?.substring(0, 8) || '未知'}`);
+
+            // 根据榜单类型选择数据
+            let dataValues = [];
+            let dataLabel = '';
+            let bgColor = '';
+
+            switch(rankType) {
+                case 'total_views_rank':
+                    dataValues = channels.map(c => c.total_views);
+                    dataLabel = '总播放量';
+                    bgColor = 'rgba(6, 182, 212, 0.7)';
+                    break;
+                case 'avg_views_rank':
+                    dataValues = channels.map(c => c.avg_views);
+                    dataLabel = '平均播放量';
+                    bgColor = 'rgba(34, 197, 94, 0.7)';
+                    break;
+                case 'video_count_rank':
+                    dataValues = channels.map(c => c.video_count);
+                    dataLabel = '视频数量';
+                    bgColor = 'rgba(234, 179, 8, 0.7)';
+                    break;
+            }
+
+            return new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: dataLabel,
+                        data: dataValues,
+                        backgroundColor: bgColor,
+                        borderColor: bgColor.replace('0.7', '1'),
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',  // 水平条形图
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: `Top ${channels.length} 频道（共采集 ${rankingData?.stats?.total_channels || '?'} 个频道）`,
+                            color: '#94a3b8',
+                            font: { size: 12 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return dataLabel + ': ' + formatNumber(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) { return formatNumber(value); }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 通用散点图函数 - 支持 100+ 数据可视化
+        function createScatterChartForAll(canvas, channels, rankType) {
+            let scatterData = [];
+            let xLabel = '';
+            let yLabel = '';
+            let bgColor = '';
+            let chartTitle = '';
+            let explanation = '';
+
+            switch(rankType) {
+                case 'total_views_rank':
+                    // 总播放榜：视频数量 vs 总播放量
+                    scatterData = channels.map((c, i) => ({
+                        x: c.video_count || 0,
+                        y: c.total_views || 0,
+                        label: c.channel_name,
+                        rank: i + 1
+                    }));
+                    xLabel = '视频数量';
+                    yLabel = '总播放量';
+                    bgColor = 'rgba(6, 182, 212, 0.6)';
+                    explanation = '气泡越高播放越多，越右发布越勤';
+                    break;
+
+                case 'avg_views_rank':
+                    // 平均播放榜：视频数量 vs 平均播放量
+                    scatterData = channels.map((c, i) => ({
+                        x: c.video_count || 0,
+                        y: c.avg_views || 0,
+                        label: c.channel_name,
+                        rank: i + 1
+                    }));
+                    xLabel = '视频数量';
+                    yLabel = '平均播放量';
+                    bgColor = 'rgba(34, 197, 94, 0.6)';
+                    explanation = '右上角=高产高质，左上角=精品少发';
+                    break;
+
+                case 'video_count_rank':
+                    // 视频数榜：视频数量 vs 总播放量（显示高产的效果）
+                    scatterData = channels.map((c, i) => ({
+                        x: c.video_count || 0,
+                        y: c.total_views || 0,
+                        label: c.channel_name,
+                        rank: i + 1
+                    }));
+                    xLabel = '视频数量';
+                    yLabel = '总播放量';
+                    bgColor = 'rgba(234, 179, 8, 0.6)';
+                    explanation = '高产是否带来高播放？看斜率';
+                    break;
+
+                case 'dark_horse_rank':
+                    // 黑马榜：订阅数 vs 最高播放量
+                    scatterData = channels.map((c, i) => ({
+                        x: c.subscriber_count || 0,
+                        y: c.max_views || 0,
+                        label: c.channel_name,
+                        rank: i + 1
+                    }));
+                    xLabel = '订阅数';
+                    yLabel = '最高播放量';
+                    bgColor = 'rgba(239, 68, 68, 0.6)';
+                    explanation = '左上方=小订阅大爆款（黑马）';
+                    break;
+
+                case 'efficiency_rank':
+                    // 高效榜：订阅数 vs 平均播放量
+                    scatterData = channels.map((c, i) => ({
+                        x: c.subscriber_count || 0,
+                        y: c.avg_views || 0,
+                        label: c.channel_name,
+                        rank: i + 1
+                    }));
+                    xLabel = '订阅数';
+                    yLabel = '平均播放量';
+                    bgColor = 'rgba(168, 85, 247, 0.6)';
+                    explanation = '左上方=转化效率高（值得学习）';
+                    break;
+            }
+
+            const totalChannels = rankingData?.stats?.total_channels || '?';
+            chartTitle = `${explanation} | 展示 ${channels.length}/${totalChannels} 个频道`;
+
+            return new Chart(canvas, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '频道',
+                        data: scatterData,
+                        backgroundColor: bgColor,
+                        borderColor: bgColor.replace('0.6', '1'),
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: chartTitle,
+                            color: '#94a3b8',
+                            font: { size: 11 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return [
+                                        `#${point.rank} ${point.label}`,
+                                        `${xLabel}: ${formatNumber(point.x)}`,
+                                        `${yLabel}: ${formatNumber(point.y)}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'logarithmic',  // 对数刻度，更好展示大范围数据
+                            title: { display: true, text: xLabel, color: '#94a3b8' },
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) { return formatNumber(value); }
+                            }
+                        },
+                        y: {
+                            type: 'logarithmic',  // 对数刻度
+                            title: { display: true, text: yLabel, color: '#94a3b8' },
+                            grid: { color: 'rgba(100, 116, 139, 0.2)' },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) { return formatNumber(value); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createScatterChart(canvas, channels, rankType) {
+            // 保留原函数作为后备
+            return createScatterChartForAll(canvas, channels, rankType);
+        }
+
+        function renderChannelList(channels) {
+            if (!channels || channels.length === 0) {
+                return '<p style="color: #64748b;">暂无数据</p>';
+            }
+
+            return channels.map((ch, i) => {
+                const analysis = ch.analysis || {};
+                const hasAnalysis = analysis.strengths?.length > 0 || analysis.weaknesses?.length > 0;
+
+                return `
+                <div class="channel-card-wrapper">
+                    <div class="channel-card">
+                        <div class="channel-rank ${i < 3 ? 'top-' + (i + 1) : ''}">${i + 1}</div>
+                        <div class="channel-info">
+                            <div class="channel-name">
+                                <a href="https://www.youtube.com/channel/${ch.channel_id}" target="_blank">
+                                    ${ch.channel_name || '未知频道'}
+                                </a>
+                                ${hasAnalysis ? `<button class="channel-expand-btn" onclick="toggleAnalysis(${i})">详细分析</button>` : ''}
+                            </div>
+                            <div class="channel-why">${ch.why_learn}</div>
+                        </div>
+                        <div class="channel-stats">
+                            <div>${formatNumber(ch.total_views)} 播放</div>
+                            <div>${ch.video_count} 个视频</div>
+                        </div>
+                    </div>
+                    ${hasAnalysis ? renderChannelAnalysis(ch, i) : ''}
+                </div>
+            `}).join('');
+        }
+
+        function renderChannelAnalysis(ch, index) {
+            const a = ch.analysis || {};
+            let html = `<div class="channel-analysis" id="analysis-${index}">`;
+
+            // 推理链：完整展示 数据→指标→对比→结论
+            html += `
+                <div class="reasoning-chain">
+                    <div class="reasoning-chain-header" onclick="toggleReasoningSteps(${index})">
+                        <h4>🔍 推理过程展开</h4>
+                        <span class="reasoning-chain-toggle" id="toggle-text-${index}">点击展开</span>
+                    </div>
+                    <div class="collapsible-content" id="reasoning-steps-${index}">
+                        <div class="reasoning-steps">
+            `;
+
+            // 步骤1: 原始数据
+            html += `
+                <div class="reasoning-step">
+                    <div class="step-indicator">
+                        <div class="step-number">1</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">📊 采集原始数据</div>
+                        <div class="step-detail">
+                            从数据库中提取该频道的视频数据，包括播放量、点赞数、发布时间等
+                            <div class="step-data-items">
+                                <span class="step-data-item">总播放: ${formatNumber(ch.total_views)}</span>
+                                <span class="step-data-item">视频数: ${ch.video_count}</span>
+                                <span class="step-data-item">订阅数: ${formatNumber(ch.subscriber_count)}</span>
+                                <span class="step-data-item">最高播放: ${formatNumber(ch.max_views)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 步骤2: 计算指标
+            html += `
+                <div class="reasoning-step">
+                    <div class="step-indicator">
+                        <div class="step-number">2</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">📐 计算关键指标</div>
+                        <div class="step-detail">
+                            ${a.calculation || '按照榜单公式计算排名指标'}
+                            <div class="step-data-items">
+                                <span class="step-data-item">平均播放: ${formatNumber(ch.avg_views)}</span>
+                                <span class="step-data-item">互动率: ${ch.engagement_rate}%</span>
+                                ${ch.subscriber_count > 0 ? `<span class="step-data-item">效率指数: ${(ch.avg_views / ch.subscriber_count).toFixed(2)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 步骤3: 对比分析
+            html += `
+                <div class="reasoning-step">
+                    <div class="step-indicator">
+                        <div class="step-number">3</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">⚖️ 横向对比</div>
+                        <div class="step-detail">
+                            与该领域其他频道进行对比，找出优势和劣势
+                            <div class="metric-bar-container">
+                                <div class="metric-bar">
+                                    <span class="metric-bar-label">播放量</span>
+                                    <div class="metric-bar-track">
+                                        <div class="metric-bar-fill" style="width: ${Math.min(100, (ch.total_views / 1000000) * 100)}%"></div>
+                                    </div>
+                                    <span class="metric-bar-value">${formatNumber(ch.total_views)}</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <span class="metric-bar-label">视频数量</span>
+                                    <div class="metric-bar-track">
+                                        <div class="metric-bar-fill" style="width: ${Math.min(100, ch.video_count * 5)}%; background: linear-gradient(90deg, #22c55e, #16a34a);"></div>
+                                    </div>
+                                    <span class="metric-bar-value">${ch.video_count}</span>
+                                </div>
+                                <div class="metric-bar">
+                                    <span class="metric-bar-label">互动率</span>
+                                    <div class="metric-bar-track">
+                                        <div class="metric-bar-fill" style="width: ${Math.min(100, ch.engagement_rate * 10)}%; background: linear-gradient(90deg, #eab308, #ca8a04);"></div>
+                                    </div>
+                                    <span class="metric-bar-value">${ch.engagement_rate}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 步骤4: 得出结论
+            html += `
+                <div class="reasoning-step">
+                    <div class="step-indicator">
+                        <div class="step-number">4</div>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">💡 得出结论</div>
+                        <div class="step-detail">
+                            <strong style="color: #22d3ee;">${a.conclusion || '该频道在当前榜单中表现突出'}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            html += `
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 优缺点分析（简化展示）
+            if ((a.strengths && a.strengths.length > 0) || (a.weaknesses && a.weaknesses.length > 0)) {
+                html += `
+                    <div class="analysis-section" style="margin-top: 16px;">
+                        <h5 style="color: #94a3b8; font-size: 0.85em; margin-bottom: 12px;">📋 详细评估</h5>
+                `;
+
+                // 优点
+                if (a.strengths && a.strengths.length > 0) {
+                    html += a.strengths.map(s => `
+                        <div class="strength-item">
+                            <div class="point">✅ ${s.point}</div>
+                            <div class="data">${s.data}</div>
+                            <div class="reasoning">${s.reasoning}</div>
+                        </div>
+                    `).join('');
+                }
+
+                // 缺点
+                if (a.weaknesses && a.weaknesses.length > 0) {
+                    html += a.weaknesses.map(w => `
+                        <div class="weakness-item">
+                            <div class="point">⚠️ ${w.point}</div>
+                            <div class="data">${w.data}</div>
+                            <div class="reasoning">${w.reasoning}</div>
+                        </div>
+                    `).join('');
+                }
+
+                html += '</div>';
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function toggleReasoningSteps(index) {
+            const content = document.getElementById(`reasoning-steps-${index}`);
+            const toggleText = document.getElementById(`toggle-text-${index}`);
+            if (content) {
+                content.classList.toggle('expanded');
+                if (content.classList.contains('expanded')) {
+                    toggleText.textContent = '点击收起';
+                } else {
+                    toggleText.textContent = '点击展开';
+                }
+            }
+        }
+
+        function toggleAnalysis(index) {
+            const el = document.getElementById(`analysis-${index}`);
+            if (el) {
+                el.classList.toggle('show');
+            }
+        }
+
+        function switchRanking(key) {
+            currentRanking = key;
+            document.querySelectorAll('.ranking-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.textContent.includes(rankingData[key].emoji));
+            });
+            document.getElementById('channelList').innerHTML = renderChannelList(rankingData[key].channels);
+
+            // 更新描述
+            const desc = document.getElementById('rankingDesc');
+            if (desc) {
+                desc.textContent = rankingData[key].description;
+            }
+
+            // 更新计算公式
+            const formula = document.getElementById('rankingFormula');
+            if (formula) {
+                formula.innerHTML = `<strong>计算公式：</strong>${rankingData[key].ranking_formula || ''}`;
+            }
+
+            // 更新图表
+            initRankingChart(rankingData[key].channels, key);
+        }
+
+        function renderWarnings(warnings) {
+            if (!warnings || warnings.length === 0) {
+                return '<p style="color: #64748b;">暂无警告</p>';
+            }
+
+            return '<div class="warning-list">' + warnings.map(w => `
+                <div class="warning-item ${w.severity}">
+                    <span class="warning-icon">${w.icon}</span>
+                    <div class="warning-content">
+                        <h4>${w.title}</h4>
+                        <p>${w.content}</p>
+                    </div>
+                </div>
+            `).join('') + '</div>';
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num?.toLocaleString() || '0';
+        }
+
+        // 页面加载时自动分析
+        window.onload = function() {
+            loadData();
+        };
+
+        // 回车搜索
+        document.getElementById('themeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadData();
+            }
+        });
+    </script>
+</body>
+</html>
