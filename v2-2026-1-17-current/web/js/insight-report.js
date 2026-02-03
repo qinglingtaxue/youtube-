@@ -251,27 +251,62 @@ window.InsightReport = window.InsightReport || {};
     // 直接在展开区域渲染图表
     function _renderChartDirectly(sourceCanvasId, targetCanvasId) {
         const chartRenderMap = {
+            // 策略1：优先尝试从原始canvas复制（适用于所有图表类型）
+            '_tryDirectCopy': () => {
+                const originalCanvas = document.getElementById(sourceCanvasId);
+                if (originalCanvas && originalCanvas.width > 0 && originalCanvas.height > 0) {
+                    const targetCanvas = document.getElementById(targetCanvasId);
+                    if (targetCanvas) {
+                        try {
+                            targetCanvas.width = originalCanvas.width;
+                            targetCanvas.height = originalCanvas.height;
+                            const ctx = targetCanvas.getContext('2d');
+                            ctx.drawImage(originalCanvas, 0, 0);
+                            console.log(`[Report] ✓ 直接复制原始图表: ${sourceCanvasId}`);
+                            return true;
+                        } catch (e) {
+                            console.warn(`[Report] 直接复制失败 ${sourceCanvasId}:`, e.message);
+                            return false;
+                        }
+                    }
+                }
+                return false;
+            },
+
+            // 策略2：根据图表类型重新渲染（后备方案）
+            'overviewScatterChart': () => {
+                // 优先复制，失败则不提供重新渲染（这个图表必须来自Tab1）
+                return chartRenderMap._tryDirectCopy();
+            },
             'languageDistChart': () => {
-                if (window._cachedUserInsights?.language) {
-                    return _renderLanguageChartToCanvas(targetCanvasId, window._cachedUserInsights.language);
+                if (!chartRenderMap._tryDirectCopy()) {
+                    if (window._cachedUserInsights?.language) {
+                        return _renderLanguageChartToCanvas(targetCanvasId, window._cachedUserInsights.language);
+                    }
                 }
                 return false;
             },
             'countryBarChart': () => {
-                if (window._cachedChannels) {
-                    return _renderCountryChartToCanvas(targetCanvasId, window._cachedChannels);
+                if (!chartRenderMap._tryDirectCopy()) {
+                    if (window._cachedChannels) {
+                        return _renderCountryChartToCanvas(targetCanvasId, window._cachedChannels);
+                    }
                 }
                 return false;
             },
             'contentTypeScatterChart': () => {
-                if (window._cachedVideos) {
-                    return _renderViewsTrendChartToCanvas(targetCanvasId, window._cachedVideos);
+                if (!chartRenderMap._tryDirectCopy()) {
+                    if (window._cachedVideos) {
+                        return _renderViewsTrendChartToCanvas(targetCanvasId, window._cachedVideos);
+                    }
                 }
                 return false;
             },
             'subsDistScatter': () => {
-                if (window._cachedChannels) {
-                    return _renderSubsDistChartToCanvas(targetCanvasId, window._cachedChannels);
+                if (!chartRenderMap._tryDirectCopy()) {
+                    if (window._cachedChannels) {
+                        return _renderSubsDistChartToCanvas(targetCanvasId, window._cachedChannels);
+                    }
                 }
                 return false;
             }
