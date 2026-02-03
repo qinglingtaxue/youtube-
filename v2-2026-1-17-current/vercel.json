@@ -9,7 +9,7 @@
       }
     },
     {
-      "src": "web/legacy/demo.html",
+      "src": "_docs/demo.html",
       "use": "@vercel/static"
     },
     {
@@ -24,7 +24,7 @@
     },
     {
       "src": "^/$",
-      "dest": "/web/insight-system.html"
+      "dest": "/_docs/demo.html"
     },
     {
       "src": "/dashboard",
@@ -36,7 +36,7 @@
     },
     {
       "src": "/demo.html",
-      "dest": "/web/legacy/demo.html"
+      "dest": "/_docs/demo.html"
     },
     {
       "src": "/(.*\\.html)$",
