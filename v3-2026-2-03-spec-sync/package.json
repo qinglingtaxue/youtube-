@@ -1,0 +1,71 @@
+{
+  "name": "youtube-minimal-video-story-v3",
+  "version": "3.0.0",
+  "description": "YouTube 端到端内容创作流水线 v3 - 规范同步版",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc --noEmit && tsc",
+    "start": "node dist/main.js",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write src/**/*.ts",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push:pg",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate:pg",
+    "api": "tsx src/api/server.ts",
+    "cli": "tsx src/cli.ts",
+    "collect": "tsx src/research/data_collector.ts",
+    "analyze": "tsx src/analysis/arbitrage_analyzer.ts",
+    "pattern": "tsx src/pattern/pattern_analyzer.ts",
+    "migration:validate-v2": "tsx scripts/validate_v2_data.ts",
+    "migration:execute": "tsx scripts/migrate_v2_to_v3.ts",
+    "migration:validate": "tsx scripts/validate_migration.ts",
+    "migration:guide": "cat MIGRATION_EXECUTION_GUIDE.md"
+  },
+  "keywords": [
+    "youtube",
+    "content-creation",
+    "data-analysis",
+    "arbitrage",
+    "video-workflow"
+  ],
+  "author": "Content Creation Team",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.24.3",
+    "fastify-websocket": "^1.1.0",
+    "drizzle-orm": "^0.30.0",
+    "pg": "^8.11.0",
+    "better-sqlite3": "^9.2.0",
+    "zod": "^3.22.0",
+    "pino": "^8.17.0",
+    "pino-pretty": "^10.3.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.0",
+    "node-cron": "^3.0.3",
+    "chart.js": "^4.4.0",
+    "d3": "^7.8.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.10.6",
+    "@types/pg": "^8.11.2",
+    "@types/better-sqlite3": "^7.6.8",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "drizzle-kit": "^0.20.14",
+    "vitest": "^1.1.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}

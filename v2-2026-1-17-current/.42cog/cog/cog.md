@@ -47,8 +47,8 @@ description: YouTube 内容创作者运营平台的认知模型
 - ConfidenceBar：置信度条，表示洞察可靠性
 - ReasoningChain：推理链，展示 AI 得出结论的过程
 - DataSourceTag：数据源标签，关联原始数据
-- ScatterChart：散点图，四象限可视化
-- BarChart：条形图，分布可视化
+- ContentQuadrantChart：四象限散点图，仅用于 ContentQuadrant 可视化
+- DurationDistributionChart：时长分布条形图，仅用于 DurationMatrix 可视化
 
 **报告实体（输出物）**
 - AnalysisReport：分析报告，综合数据洞察
@@ -434,27 +434,59 @@ description: YouTube 内容创作者运营平台的认知模型
 | 穴位按摩内容缺口 | 4.5 | Google ↑76%，YouTube 仅 7 条 |
 </PatternReport>
 
+<PatternDetail>
+- 唯一编码：pattern_id (同 PatternAnalysis 的 pattern_id)
+- 页面路径：`web/pattern-detail.html`
+- 用途：单个模式的深度分析页面
+- 核心属性：
+  - pattern_id：关联的模式 ID
+  - title：模式标题（从 PatternAnalysis.finding 派生）
+  - dimension：模式维度（variable/temporal/spatial/channel/user）
+  - interestingness：有趣度得分（1-5）
+  - confidence：置信度（0-100%）
+  - insight_card：为该模式生成的洞察卡片（包含 visualization + reasoning_chain）
+  - sources：详细的数据源列表和来源描述
+  - sample_videos：该模式的典型视频示例列表
+  - action_checklist：基于该模式的具体行动建议清单
+  - related_patterns：相关/相似模式的推荐列表
+
+**设计目的**
+为每个发现的模式提供独立的详情页面，展示完整的分析过程、数据支撑和可执行建议。
+</PatternDetail>
+
 <LearningPath>
 - 唯一编码：path_id (singleton)
-- 用途：引导用户按需探索 42 个模式
-- **页面位置**：已集成到 `web/insight-system.html` 的模式分析标签页
+- 用途：42 个模式的导航结构和学习路径（NOT 等同于 PatternReport）
+- 关键区别：PatternReport 是静态报告，LearningPath 是动态导航交互
+- **页面位置**：已集成到 `web/insight-system.html` 的导航栏和侧边栏
 - 核心属性：
-  - blocks：3 个主 Tab + 1 个外链 + 1 个隐藏 Tab
-    - title：板块标题
-    - description：板块描述
-    - pattern_count：模式数量
-    - sub_tabs：子标签页列表
+  - blocks：3 个主 Tab + 1 个外链 + 1 个隐藏 Tab（导航分组）
+    - title：Tab 标题（分类名称）
+    - description：Tab 描述（导航说明）
+    - pattern_count：该分组包含的模式数
+    - sub_tabs：子标签页列表（模式细分）
+      - sub_title：细分标题
+      - pattern_ids：该细分下的模式 ID 列表
+      - deep_link：深度链接至 `pattern-detail.html?id=...`
   - stats：底部统计（视频数、频道数、总播放、天跨度、洞察数）
+  - quick_search：快速搜索框（按模式名、关键词搜索）
 
-**实际页面结构（3+1+1）**
+**导航结构（3 主 Tab + 1 外链 + 1 隐藏 Tab）**
 
-| Tab | 名称 | 子标签数 | 子标签内容 |
-|-----|------|----------|-----------|
-| Tab 1 | 🌍 全局认识 | 5 | 数据概览、频道分析、内容类型分析、播放趋势、市场边界 |
-| Tab 2 | 💰 套利分析 | 6 | 话题套利、时长套利、频道套利、趋势套利、跨语言套利、综合套利 |
-| Tab 7 | 📋 信息报告 | 4 | 数据报告、结论摘要、数据导出、语言分布 |
-| 外链 | 🎬 创作者行动中心 | - | 跳转至 `creator-action.html` |
-| Tab 8 | 👥 用户洞察 | 5 | （隐藏）用户画像、评论热词、情感分析、问题提取、需求洞察 |
+| Tab | 名称 | 子标签数 | 导航到 | 用途 |
+|-----|------|----------|---------|------|
+| Tab 1 | 🌍 全局认识 | 5 | 全局模式 | 整体市场认知 |
+| Tab 2 | 💰 套利分析 | 6 | 套利机会模式 | 发现价值洼地 |
+| Tab 7 | 📋 信息报告 | 4 | 数据报告 | 查看详细数据 |
+| 外链 | 🎬 创作者行动中心 | - | `creator-action.html` | 查看具体行动计划 |
+| Tab 8 | 👥 用户洞察 | 5 | 用户相关模式 | （隐藏）用户深度分析 |
+
+**重要澄清**
+- LearningPath 与 PatternReport 的关系：
+  - PatternReport = 数据汇总报告（what & how many）
+  - LearningPath = 用户导航体验（how to explore & learn）
+  - 两者都基于相同的 42 个 PatternAnalysis，但目的不同
+- 每个 sub_tab 项都链接到对应的 `pattern-detail.html` 页面
 
 **JS 模块架构**
 
@@ -516,14 +548,40 @@ web/js/
 
 <MonitorTask>
 - 唯一编码：task_id (UUID)
+- 用途：定时监控任务的管理单元（调度层）
 - 核心属性：
   - keyword：监控关键词
-  - interval：采集间隔
+  - interval：采集间隔（分钟）
   - last_run：上次运行时间
   - next_run：下次运行时间
   - status：状态（pending、running、completed、failed）
   - video_count：已采集视频数
+
+**与 TrendingTracker 的区别**：
+- MonitorTask = 监控任务配置和执行（调度层）
+- TrendingTracker = 监控结果的呈现（展示层）
 </MonitorTask>
+
+<TrendingTracker>
+- 唯一编码：tracker_id (关联的 MonitorTask.task_id)
+- 用途：MonitorTask 执行结果的展示和可视化（呈现层）
+- 关键区别：NOT 是独立实体，而是 MonitorTask 执行结果的包装视图
+- 核心属性：
+  - task_id：关联的监控任务 ID
+  - keyword：监控的关键词
+  - last_update_time：最后更新时间
+  - trend_data：趋势数据对象
+    - period：时间段（24h/7d/30d）
+    - snapshots：时间序列的快照数据（从 TrendSnapshot 聚合）
+    - total_views_delta：总播放量变化
+    - avg_daily_growth：平均日增长
+    - top_growing_videos：增长最快的视频列表
+  - visualization：趋势图表（LineChart 显示播放量增长曲线）
+  - alert_status：是否触发预警（高增长/突跌）
+
+**设计目的**
+为 MonitorTask 的执行结果提供直观的可视化展示，用户无需关心任务配置，只需查看实时趋势数据。
+</TrendingTracker>
 
 <DiagnoseReport>
 - 唯一编码：diagnose_id (UUID)
@@ -858,8 +916,9 @@ pending → running → completed
 - AnalysisReport → InsightCard：一对多（报告包含多个洞察卡片）
 - InsightCard → ReasoningChain：一对一（每个洞察有推理链）
 - InsightCard → DataSourceTag：一对多（洞察关联多个数据源）
-- ContentQuadrant → ScatterChart：一对一（四象限生成散点图）
-- DurationMatrix → BarChart：一对一（时长分布生成条形图）
+- ContentQuadrant → ContentQuadrantChart：一对一（四象限数据生成散点图表示）
+- DurationMatrix → DurationDistributionChart：一对一（时长分布数据生成条形图表示）
+- InsightCard.visualization：可关联任何图表类型（ContentQuadrantChart / DurationDistributionChart / 其他）
 
 **套利分析关系**
 - CompetitorVideo → KeywordNetwork：多对多（视频标题构建关键词网络）
@@ -917,6 +976,12 @@ Video.youtube_id（发布成功）
 Analytics → 下一轮调研输入
 ```
 
+**监控追踪关系**
+- MonitorTask → CompetitorVideo：一对多（监控任务产生新采集视频）
+- MonitorTask → TrendingTracker：一对一（任务配置对应结果展示）
+- TrendingTracker → TrendSnapshot：多对多（展示包含多个快照）
+- TrendingTracker → InsightCard：一对多（可生成多个趋势洞察卡片）
+
 **任务调度关系**
 - Task → Video：多对一（多个任务服务于同一视频）
 - Task → TaskState：一对一（API 层状态追踪）
@@ -924,11 +989,32 @@ Analytics → 下一轮调研输入
 - Video → Spec：一对一（视频对应规约）
 - Video → Analytics：一对多（视频多个周期的分析数据）
 
-**模式分析关系**
+**模式分析关系（四层架构）**
+```
+数据层（Data）
+  CompetitorVideo → PatternAnalysis：多对多（视频贡献到多个模式发现）
+                          ↓
+报告层（Report）
+  PatternAnalysis → PatternReport：多对一（42个模式汇总到报告）
+                          ↓
+呈现层（Presentation）
+  PatternReport → InsightCard (type=pattern)：多对一（模式转化为洞察卡片）
+  InsightCard.visualization → ContentQuadrantChart/DurationDistributionChart：关联图表
+  InsightCard.reasoning_chain → ReasoningChain：推理过程
+                          ↓
+导航层（Navigation）
+  LearningPath ⇌ InsightCard：导航结构链接模式洞察卡片
+                          ↓
+详情层（Detail）
+  PatternDetail ← InsightCard + PatternAnalysis：单个模式深度分析页面
+```
+
 - CompetitorVideo → PatternAnalysis：多对多（视频贡献到多个模式发现）
-- PatternAnalysis → PatternReport：多对一（模式汇总到报告）
-- PatternReport → InsightSystem：一对一（报告呈现在洞察系统页面）
-- InsightSystem → InsightCard：一对多（洞察系统包含多个洞察卡片）
+- PatternAnalysis → PatternReport：多对一（42 个模式汇总到报告）
+- PatternReport ≠ LearningPath（前者是数据报告，后者是导航体验）
+- InsightCard (type=pattern) ← PatternAnalysis：洞察卡片呈现模式
+- InsightCard → PatternDetail：导航至详情页
+- LearningPath → PatternDetail：通过导航结构链接到详情页
 </rel>
 
 ---
@@ -1210,7 +1296,7 @@ rich
 | 模式详情 | `web/pattern-detail.html` | PatternAnalysis, InsightCard | 单个模式深度分析、置信度、数据源 |
 | 竞品报告 | `public/index.html` | AnalysisReport, MarketReport | 数据概览、市场边界 |
 | 套利分析 | `public/arbitrage.html` | ArbitrageReport, ArbitrageOpportunity | 套利机会发现 |
-| 内容四象限 | `public/content-map.html` | ContentQuadrant, ScatterChart | 播放量×互动率矩阵 |
+| 内容四象限 | `public/content-map.html` | ContentQuadrant, ContentQuadrantChart | 播放量×互动率矩阵 |
 | 创作者分析 | `public/creators.html` | Channel, DiagnoseReport | 频道对比 |
 | 标题公式 | `public/titles.html` | CompetitorVideo | 高播放标题特征 |
 | 行动建议 | `public/actions.html` | ArbitrageOpportunity | 具体操作指引 |
