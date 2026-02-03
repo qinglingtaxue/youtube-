@@ -32,11 +32,11 @@
     },
     {
       "src": "/dashboard",
-      "dest": "/web/insight-system.html"
+      "dest": "/web/legacy/demo.html"
     },
     {
       "src": "^/$",
-      "dest": "/web/insight-system.html"
+      "dest": "/web/legacy/demo.html"
     }
   ],
   "regions": ["sin1"]
