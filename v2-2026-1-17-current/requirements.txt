@@ -1,0 +1,30 @@
+# YouTube 内容创作流水线 - Python 依赖
+# Vercel 部署只需要 API 相关依赖
+
+# CLI 工具
+click>=8.1.0
+rich>=13.0.0
+
+# 配置管理
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# 数据库
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9      # PostgreSQL 同步驱动
+
+# 网络请求
+httpx>=0.25.0
+
+# Web API 服务器
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+websockets>=12.0
+mangum>=0.17.0              # AWS Lambda/Vercel 适配器
+
+# 数据处理
+jieba>=0.42.1
+networkx>=3.0
+
+# YouTube 爬虫
+yt-dlp>=2025.11.0

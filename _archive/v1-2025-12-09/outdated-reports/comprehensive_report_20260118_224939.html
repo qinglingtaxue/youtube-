@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 竞品分析报告 - 2026-01-18</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 24px; }
+        .header .meta { font-size: 14px; opacity: 0.9; }
+
+        /* 标签页导航 */
+        .tabs {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 40px;
+            display: flex;
+            gap: 0;
+        }
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #667eea; }
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* 内容区 */
+        .content { padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* 卡片 */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card-label { font-size: 13px; color: #888; margin-bottom: 8px; }
+        .card-value { font-size: 28px; font-weight: 700; color: #333; }
+        .card-sub { font-size: 12px; color: #999; margin-top: 5px; }
+        .card.highlight { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .card.highlight .card-label { color: rgba(255,255,255,0.8); }
+        .card.highlight .card-value { color: white; }
+        .card.highlight .card-sub { color: rgba(255,255,255,0.7); }
+
+        /* 图表容器 */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .chart-wrapper { position: relative; height: 300px; }
+
+        /* 表格 */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+        tr:hover { background: #f8f9fa; }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-green { background: #d4edda; color: #155724; }
+        .badge-blue { background: #cce5ff; color: #004085; }
+        .badge-yellow { background: #fff3cd; color: #856404; }
+        .badge-purple { background: #e2d5f8; color: #5a2d82; }
+
+        /* 两列布局 */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        /* 洞察卡片 */
+        .insight {
+            background: #fff;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        .insight-title { font-weight: 600; color: #333; margin-bottom: 5px; }
+        .insight-text { color: #666; font-size: 14px; }
+
+        /* 进度条 */
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        /* 全局时间过滤器样式 */
+        .global-time-filter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .time-filter-btn {
+            padding: 6px 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .time-filter-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .time-filter-btn.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* 当前时间范围指示器 */
+        .time-range-indicator {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .time-range-indicator::before {
+            content: '📅';
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>YouTube 竞品分析报告</h1>
+            <div class="meta">主题: 老人养生 | 样本: 1,020 个视频</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="global-time-filter">
+                <span style="font-size: 12px; opacity: 0.8; margin-right: 8px;">数据范围:</span>
+                <button class="time-filter-btn" onclick="setGlobalTimeFilter('1天内')">1天内</button>
+                <button class="time-filter-btn" onclick="setGlobalTimeFilter('15天内')">15天内</button>
+                <button class="time-filter-btn active" onclick="setGlobalTimeFilter('30天内')">30天内</button>
+                <button class="time-filter-btn" onclick="setGlobalTimeFilter('全部')">全部</button>
+            </div>
+            <div class="meta">
+                生成时间: 2026-01-18 22:49:39
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('overview')">📊 概览</div>
+        <div class="tab" onclick="showTab('market')">🌐 市场边界</div>
+        <div class="tab" onclick="showTab('time')">📅 时间分析</div>
+        <div class="tab" onclick="showTab('opportunities')">🎯 AI创作机会</div>
+        <div class="tab" onclick="showTab('content')">📝 内容分析</div>
+    </div>
+
+    <div class="content">
+        <!-- 概览页 -->
+        <div id="overview" class="tab-content active">
+            
+        <div class="cards">
+            <div class="card highlight">
+                <div class="card-label">总视频数</div>
+                <div class="card-value">1,020</div>
+                <div class="card-sub">样本覆盖范围</div>
+            </div>
+            <div class="card">
+                <div class="card-label">总播放量</div>
+                <div class="card-value">65,304,549</div>
+                <div class="card-sub">累计播放</div>
+            </div>
+            <div class="card">
+                <div class="card-label">平均播放量</div>
+                <div class="card-value">64,024</div>
+                <div class="card-sub">中位数: 2,330</div>
+            </div>
+            <div class="card">
+                <div class="card-label">总频道数</div>
+                <div class="card-value">476</div>
+                <div class="card-sub">参与竞争的频道</div>
+            </div>
+            <div class="card">
+                <div class="card-label">爆款率</div>
+                <div class="card-value">1.67%</div>
+                <div class="card-sub">100万+播放</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Top10%门槛</div>
+                <div class="card-value">122,035</div>
+                <div class="card-sub">播放量</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-container">
+                <div class="chart-title">📊 关键发现</div>
+                <div class="insight"><div class="insight-text">数据集包含 1020 个视频，总播放量 65,304,549</div></div><div class="insight"><div class="insight-text">播放量分布呈明显右偏（均值 64,024 >> 中位数 2,327.5），存在头部效应</div></div><div class="insight"><div class="insight-text">最常见的标题模式是「question」类型，占比 16.1%</div></div><div class="insight"><div class="insight-text">最佳视频时长区间为「20-60分钟」，该区间视频平均播放量最高</div></div><div class="insight"><div class="insight-text">头部频道「赵宇昊教授」贡献了最多播放量（9,537,436）</div></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">⚠️ 数据覆盖情况</div>
+                <div style="padding: 20px;">
+                    <p><strong>有发布时间的视频:</strong> 100 (9.8%)</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 9.8%"></div>
+                    </div>
+                    <p style="margin-top: 15px;"><strong>数据时间跨度:</strong></p>
+                    <p>2016-07-19 ~ 2025-12-23</p>
+                    <p style="color: #888;">共 9年5个月</p>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+
+        <!-- 市场边界页 -->
+        <div id="market" class="tab-content">
+            
+        <div class="cards">
+            <div class="card highlight">
+                <div class="card-label">总频道数</div>
+                <div class="card-value">476</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Top10 集中度</div>
+                <div class="card-value">62.6%</div>
+                <div class="card-sub">头部10个频道占总播放量</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Top20 集中度</div>
+                <div class="card-value">81.0%</div>
+            </div>
+            <div class="card">
+                <div class="card-label">单视频频道</div>
+                <div class="card-value">363</div>
+                <div class="card-sub">占 76.3%</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-container">
+                <div class="chart-title">📊 频道规模分布</div>
+                <div class="chart-wrapper">
+                    <canvas id="channelSizeChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">📈 播放量分层</div>
+                <div class="chart-wrapper">
+                    <canvas id="viewTiersChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="chart-title">🏆 头部频道 Top 10</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>频道名称</th>
+                        <th>视频数</th>
+                        <th>总播放</th>
+                        <th>平均播放</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                <td>1</td>
+                <td>赵宇昊教授</td>
+                <td>141</td>
+                <td>9,537,436</td>
+                <td>67,641</td>
+            </tr><tr>
+                <td>2</td>
+                <td>健康2.0</td>
+                <td>17</td>
+                <td>6,338,660</td>
+                <td>372,862</td>
+            </tr><tr>
+                <td>3</td>
+                <td>風傳媒 The Storm Media</td>
+                <td>2</td>
+                <td>6,336,754</td>
+                <td>3,168,377</td>
+            </tr><tr>
+                <td>4</td>
+                <td>Laxne</td>
+                <td>12</td>
+                <td>4,833,579</td>
+                <td>402,798</td>
+            </tr><tr>
+                <td>5</td>
+                <td>早安健康</td>
+                <td>4</td>
+                <td>3,624,087</td>
+                <td>906,021</td>
+            </tr><tr>
+                <td>6</td>
+                <td>laxne</td>
+                <td>12</td>
+                <td>2,697,645</td>
+                <td>224,803</td>
+            </tr><tr>
+                <td>7</td>
+                <td>灵月的养生手记</td>
+                <td>43</td>
+                <td>2,212,177</td>
+                <td>51,445</td>
+            </tr><tr>
+                <td>8</td>
+                <td>聚焦2.0</td>
+                <td>3</td>
+                <td>2,112,502</td>
+                <td>704,167</td>
+            </tr><tr>
+                <td>9</td>
+                <td>养生老郑</td>
+                <td>3</td>
+                <td>1,655,797</td>
+                <td>551,932</td>
+            </tr><tr>
+                <td>10</td>
+                <td>謝教授 談脊椎</td>
+                <td>1</td>
+                <td>1,562,284</td>
+                <td>1,562,284</td>
+            </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        </div>
+
+        <!-- 时间分析页 -->
+        <div id="time" class="tab-content">
+            
+        <div class="cards">
+            <div class="card highlight">
+                <div class="card-label">数据时间跨度</div>
+                <div class="card-value">9年5个月</div>
+                <div class="card-sub">2016-07-19 ~ 2025-12-23</div>
+            </div>
+            <div class="card">
+                <div class="card-label">有日期视频</div>
+                <div class="card-value">100</div>
+                <div class="card-sub">占比 9.8%</div>
+            </div>
+            <div class="card">
+                <div class="card-label">24小时内</div>
+                <div class="card-value">0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">7天内</div>
+                <div class="card-value">0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">30天内</div>
+                <div class="card-value">1</div>
+            </div>
+            <div class="card">
+                <div class="card-label">90天内</div>
+                <div class="card-value">14</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">📅 视频时间分布</div>
+            <div class="chart-wrapper">
+                <canvas id="timeDistChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-container">
+                <div class="chart-title">📈 年度发布趋势</div>
+                <div class="chart-wrapper">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">📆 星期分布</div>
+                <div class="chart-wrapper">
+                    <canvas id="weekdayChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+
+        <!-- AI创作机会页 -->
+        <div id="opportunities" class="tab-content">
+            
+        <style>
+            /* 时间窗口子标签样式 */
+            .time-tabs {
+                display: flex;
+                gap: 0;
+                margin-bottom: 15px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            .time-tab {
+                padding: 8px 16px;
+                cursor: pointer;
+                font-size: 13px;
+                color: #666;
+                border-bottom: 2px solid transparent;
+                transition: all 0.2s;
+            }
+            .time-tab:hover { color: #667eea; }
+            .time-tab.active {
+                color: #667eea;
+                border-bottom-color: #667eea;
+                font-weight: 600;
+            }
+            /* 可点击链接样式 */
+            .video-link {
+                color: #333;
+                text-decoration: none;
+                transition: color 0.2s;
+            }
+            .video-link:hover {
+                color: #667eea;
+                text-decoration: underline;
+            }
+            .channel-link {
+                color: #666;
+                text-decoration: none;
+                font-size: 13px;
+            }
+            .channel-link:hover {
+                color: #764ba2;
+                text-decoration: underline;
+            }
+            /* 增长趋势图样式 */
+            .trend-summary {
+                display: flex;
+                gap: 20px;
+                margin-top: 15px;
+                padding: 15px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+            .trend-stat {
+                text-align: center;
+            }
+            .trend-stat-value {
+                font-size: 24px;
+                font-weight: 700;
+                color: #667eea;
+            }
+            .trend-stat-label {
+                font-size: 12px;
+                color: #666;
+            }
+        </style>
+
+        <!-- 增长趋势图 -->
+        <div class="chart-container">
+            <div class="chart-title">📈 增长趋势图</div>
+            <div class="time-tabs" id="trendChartTabs">
+                <div class="time-tab" onclick="switchTrendChart('1天内')">1天内</div>
+                <div class="time-tab" onclick="switchTrendChart('15天内')">15天内</div>
+                <div class="time-tab active" onclick="switchTrendChart('30天内')">30天内</div>
+            </div>
+            <div class="chart-wrapper" style="height: 350px;">
+                <canvas id="growthTrendChart"></canvas>
+            </div>
+            <div class="trend-summary" id="trendSummary">
+                <div class="trend-stat">
+                    <div class="trend-stat-value" id="trendTotalGrowth">-</div>
+                    <div class="trend-stat-label">总增长</div>
+                </div>
+                <div class="trend-stat">
+                    <div class="trend-stat-value" id="trendAvgDaily">-</div>
+                    <div class="trend-stat-label">日均增长</div>
+                </div>
+                <div class="trend-stat">
+                    <div class="trend-stat-value" id="trendPeakDay">-</div>
+                    <div class="trend-stat-label">峰值日增长</div>
+                </div>
+                <div class="trend-stat">
+                    <div class="trend-stat-value" id="trendVideoCount">-</div>
+                    <div class="trend-stat-label">监控视频数</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card highlight">
+                <div class="card-label">高增长视频</div>
+                <div class="card-value">62</div>
+                <div class="card-sub">日增 500+ 播放</div>
+            </div>
+            <div class="card">
+                <div class="card-label">小频道爆款</div>
+                <div class="card-value">114</div>
+                <div class="card-sub">1-3视频频道的爆款</div>
+            </div>
+            <div class="card">
+                <div class="card-label">高互动模板</div>
+                <div class="card-value">23</div>
+                <div class="card-sub">互动率 > 3%</div>
+            </div>
+            <div class="card">
+                <div class="card-label">最佳时间窗口</div>
+                <div class="card-value">1年以上</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="chart-container">
+                <div class="chart-title">💡 机会建议</div>
+                <ul style="padding-left: 20px; line-height: 2;">
+                    <li>高增长视频日均播放 14,745，存在快速起量机会</li><li>近90天有 3 个小频道爆款，新频道有机会</li><li>发现 23 个高互动模板，适合 AI 配音复制</li>
+                </ul>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">🎯 行动项</div>
+                <ul style="padding-left: 20px; line-height: 2;">
+                    <li>优先模仿 30 天内的近期爆款</li><li>关注日增长 > 1000 的高速增长视频</li><li>参考小频道爆款的选题和标题</li><li>使用高互动率视频作为 AI 配音模板</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 近期爆款 - 带时间窗口切换 -->
+        <div class="table-container">
+            <div class="chart-title">🔥 近期爆款（按时间窗口）</div>
+            <div class="time-tabs" id="recentViralTabs">
+                <div class="time-tab" onclick="filterRecentViral('1天内')">1天内</div>
+                <div class="time-tab" onclick="filterRecentViral('15天内')">15天内</div>
+                <div class="time-tab" onclick="filterRecentViral('30天内')">30天内</div>
+                <div class="time-tab active" onclick="filterRecentViral('全部')">全部</div>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>时间段</th><th>标题</th><th>频道</th><th>播放量</th><th>日增长</th><th>发布日期</th></tr>
+                </thead>
+                <tbody id="recentViralBody"></tbody>
+            </table>
+        </div>
+
+        <!-- 高日增长 - 带时间窗口切换 -->
+        <div class="table-container">
+            <div class="chart-title">📈 高日增长视频 Top 10</div>
+            <div class="time-tabs" id="highGrowthTabs">
+                <div class="time-tab" onclick="filterHighGrowth('1天内')">1天内</div>
+                <div class="time-tab" onclick="filterHighGrowth('15天内')">15天内</div>
+                <div class="time-tab" onclick="filterHighGrowth('30天内')">30天内</div>
+                <div class="time-tab active" onclick="filterHighGrowth('全部')">全部</div>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>时间段</th><th>标题</th><th>频道</th><th>总播放</th><th>日增长</th></tr>
+                </thead>
+                <tbody id="highGrowthBody"></tbody>
+            </table>
+        </div>
+
+        <!-- 小频道黑马 - 带时间窗口切换 -->
+        <div class="table-container">
+            <div class="chart-title">🌟 小频道黑马 Top 10</div>
+            <div class="time-tabs" id="smallChannelTabs">
+                <div class="time-tab" onclick="filterSmallChannel('1天内')">1天内</div>
+                <div class="time-tab" onclick="filterSmallChannel('15天内')">15天内</div>
+                <div class="time-tab" onclick="filterSmallChannel('30天内')">30天内</div>
+                <div class="time-tab active" onclick="filterSmallChannel('全部')">全部</div>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>时间段</th><th>频道</th><th>标题</th><th>播放量</th></tr>
+                </thead>
+                <tbody id="smallChannelBody"></tbody>
+            </table>
+        </div>
+
+        <script>
+            // 数据存储
+            const recentViralData = {"1天内": [], "15天内": [], "30天内": [{"window": "30天内", "title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ", "channel": "laxne", "views": 1133521, "daily_growth": 43596, "published_at": "2025-12-23"}], "全部": [{"window": "30天内", "title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ", "channel": "laxne", "views": 1133521, "daily_growth": 43596, "published_at": "2025-12-23"}, {"window": "90天内", "title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "url": "https://www.youtube.com/watch?v=amXv4nPkagI", "channel": "Laxne", "views": 1477049, "daily_growth": 16977, "published_at": "2025-10-23"}, {"window": "90天内", "title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #T...", "url": "https://www.youtube.com/watch?v=xNREi02Yf_c", "channel": "Laxne", "views": 1282306, "daily_growth": 14571, "published_at": "2025-10-22"}, {"window": "90天内", "title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ", "channel": "laxne", "views": 1133521, "daily_growth": 43596, "published_at": "2025-12-23"}, {"window": "90天内", "title": "不同胃疼代表什么?#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TC...", "url": "https://www.youtube.com/watch?v=K1Nh0SMNwk4", "channel": "Laxne", "views": 1054501, "daily_growth": 11848, "published_at": "2025-10-21"}, {"window": "90天内", "title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc", "channel": "laxnetcm", "views": 644114, "daily_growth": 7319, "published_at": "2025-10-22"}, {"window": "90天内", "title": "晚上夜尿多记好一个土方子#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 ...", "url": "https://www.youtube.com/watch?v=FTzDu5D8_UM", "channel": "laxne", "views": 558689, "daily_growth": 15962, "published_at": "2025-12-14"}, {"window": "90天内", "title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw", "channel": "laxne", "views": 538517, "daily_growth": 7919, "published_at": "2025-11-11"}, {"window": "90天内", "title": "老化研究專家：科學上唯一證實有效抗老的方式，一毛錢都不必花｜【初日會客室】許翱麟 教授", "url": "https://www.youtube.com/watch?v=E8TWhte2huc", "channel": "Cofit x 宋晏仁醫師 - 初日醫學", "views": 272725, "daily_growth": 8522, "published_at": "2025-12-17"}, {"window": "90天内", "title": "#健康科普", "url": "https://www.youtube.com/watch?v=1jA4StFqmes", "channel": "赵宇昊教授", "views": 218017, "daily_growth": 5450, "published_at": "2025-12-09"}, {"window": "90天内", "title": "安睡饮#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM #中医学...", "url": "https://www.youtube.com/watch?v=KNqvbAf6r3E", "channel": "Laxne", "views": 216829, "daily_growth": 2463, "published_at": "2025-10-22"}, {"window": "6个月内", "title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "url": "https://www.youtube.com/watch?v=hWEUjh-73N8", "channel": "养生老郑", "views": 1627912, "daily_growth": 12522, "published_at": "2025-09-10"}, {"window": "6个月内", "title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "url": "https://www.youtube.com/watch?v=amXv4nPkagI", "channel": "Laxne", "views": 1477049, "daily_growth": 16977, "published_at": "2025-10-23"}, {"window": "6个月内", "title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #T...", "url": "https://www.youtube.com/watch?v=xNREi02Yf_c", "channel": "Laxne", "views": 1282306, "daily_growth": 14571, "published_at": "2025-10-22"}, {"window": "6个月内", "title": "#健康科普 #抖出健康知识宝藏 #科普 #医学科普 #昆明", "url": "https://www.youtube.com/watch?v=aMw6KqI5sSI", "channel": "Zen Tao Health", "views": 1249240, "daily_growth": 8218, "published_at": "2025-08-19"}, {"window": "6个月内", "title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ", "channel": "laxne", "views": 1133521, "daily_growth": 43596, "published_at": "2025-12-23"}, {"window": "6个月内", "title": "不同胃疼代表什么?#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TC...", "url": "https://www.youtube.com/watch?v=K1Nh0SMNwk4", "channel": "Laxne", "views": 1054501, "daily_growth": 11848, "published_at": "2025-10-21"}, {"window": "6个月内", "title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc", "channel": "laxnetcm", "views": 644114, "daily_growth": 7319, "published_at": "2025-10-22"}, {"window": "6个月内", "title": "晚上夜尿多记好一个土方子#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 ...", "url": "https://www.youtube.com/watch?v=FTzDu5D8_UM", "channel": "laxne", "views": 558689, "daily_growth": 15962, "published_at": "2025-12-14"}, {"window": "6个月内", "title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw", "channel": "laxne", "views": 538517, "daily_growth": 7919, "published_at": "2025-11-11"}, {"window": "6个月内", "title": "108岁老奶奶透露出的长寿秘诀。#生活小常识 #养生之道 #健康好生活", "url": "https://www.youtube.com/watch?v=g0oHGDSaxw4", "channel": "山村姑娘", "views": 385580, "daily_growth": 2203, "published_at": "2025-07-27"}]};
+            const highGrowthData = {"1天内": [], "15天内": [], "30天内": [{"bucket": "30天内", "title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ", "channel": "laxne", "views": 1133521, "daily_growth": 43596}], "全部": [{"bucket": "30天内", "title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ", "channel": "laxne", "views": 1133521, "daily_growth": 43596}, {"bucket": "90天内", "title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "url": "https://www.youtube.com/watch?v=amXv4nPkagI", "channel": "Laxne", "views": 1477049, "daily_growth": 16977}, {"bucket": "90天内", "title": "晚上夜尿多记好一个土方子#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 ...", "url": "https://www.youtube.com/watch?v=FTzDu5D8_UM", "channel": "laxne", "views": 558689, "daily_growth": 15962}, {"bucket": "90天内", "title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #T...", "url": "https://www.youtube.com/watch?v=xNREi02Yf_c", "channel": "Laxne", "views": 1282306, "daily_growth": 14571}, {"bucket": "6个月内", "title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "url": "https://www.youtube.com/watch?v=hWEUjh-73N8", "channel": "养生老郑", "views": 1627912, "daily_growth": 12522}, {"bucket": "90天内", "title": "不同胃疼代表什么?#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TC...", "url": "https://www.youtube.com/watch?v=K1Nh0SMNwk4", "channel": "Laxne", "views": 1054501, "daily_growth": 11848}, {"bucket": "90天内", "title": "老化研究專家：科學上唯一證實有效抗老的方式，一毛錢都不必花｜【初日會客室】許翱麟 教授", "url": "https://www.youtube.com/watch?v=E8TWhte2huc", "channel": "Cofit x 宋晏仁醫師 - 初日醫學", "views": 272725, "daily_growth": 8522}, {"bucket": "6个月内", "title": "#健康科普 #抖出健康知识宝藏 #科普 #医学科普 #昆明", "url": "https://www.youtube.com/watch?v=aMw6KqI5sSI", "channel": "Zen Tao Health", "views": 1249240, "daily_growth": 8218}, {"bucket": "90天内", "title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw", "channel": "laxne", "views": 538517, "daily_growth": 7919}, {"bucket": "90天内", "title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc", "channel": "laxnetcm", "views": 644114, "daily_growth": 7319}, {"bucket": "90天内", "title": "#健康科普", "url": "https://www.youtube.com/watch?v=1jA4StFqmes", "channel": "赵宇昊教授", "views": 218017, "daily_growth": 5450}, {"bucket": "90天内", "title": "75歲以上長壽秘訣曝光！6條健康指標做到3條，輕鬆活過95歲不費力！", "url": "https://www.youtube.com/watch?v=rJiYBpHRJvQ", "channel": "健康養生", "views": 215087, "daily_growth": 4217}, {"bucket": "1年内", "title": "猪皮、鸡皮能吃吗？ #医学科普 #健康科普在快手 #饮食健康", "url": "https://www.youtube.com/watch?v=Ane4HbERk9Q", "channel": "赵宇昊教授", "views": 1015626, "daily_growth": 4214}, {"bucket": "1年以上", "title": "【健康】不吃藥狂降壞膽固醇！名醫曝5大天然食物清血管：三酸肝油酯從600→145！ft.劉博仁醫師｜...", "url": "https://www.youtube.com/watch?v=jJnekeWymgg", "channel": "風傳媒 The Storm Media", "views": 3933921, "daily_growth": 4063}, {"bucket": "1年内", "title": "皮肤出现这6个表现当心血糖高 #健康科普知识 #暖冬健康指南 #过个快手健康年 #糖尿病", "url": "https://www.youtube.com/watch?v=s3eMN8Mgluc", "channel": "赵宇昊教授", "views": 957124, "daily_growth": 4021}, {"bucket": "1年内", "title": "苹果煮水喝，调理一身小毛病 #中医 #养生 #消化不良 #肝火旺", "url": "https://www.youtube.com/watch?v=QrSFzBaO3mI", "channel": "中医王芹", "views": 776079, "daily_growth": 3233}, {"bucket": "90天内", "title": "安睡饮#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM #中医学...", "url": "https://www.youtube.com/watch?v=KNqvbAf6r3E", "channel": "Laxne", "views": 216829, "daily_growth": 2463}, {"bucket": "6个月内", "title": "哪有什么失眠多半是心血不足了中医教你一招#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养...", "url": "https://www.youtube.com/watch?v=645m4OAVnmo", "channel": "Laxne", "views": 223997, "daily_growth": 2408}, {"bucket": "90天内", "title": "#健康科普知识在快手 #健康科普 #心血管", "url": "https://www.youtube.com/watch?v=yyMMbt6iPWE", "channel": "赵宇昊教授", "views": 168797, "daily_growth": 2221}, {"bucket": "6个月内", "title": "108岁老奶奶透露出的长寿秘诀。#生活小常识 #养生之道 #健康好生活", "url": "https://www.youtube.com/watch?v=g0oHGDSaxw4", "channel": "山村姑娘", "views": 385580, "daily_growth": 2203}]};
+            const smallChannelData = {"1天内": [], "15天内": [], "30天内": [], "全部": [{"bucket": "1年以上", "title": "【健康】不吃藥狂降壞膽固醇！名醫曝5大天然食物清血管：三酸肝油酯從600→145！ft.劉博仁醫師｜...", "url": "https://www.youtube.com/watch?v=jJnekeWymgg", "channel": "風傳媒 The Storm Media", "views": 3933921}, {"bucket": "1年以上", "title": "逆轉腎臟病只要持續2習慣？！專科醫師：三個月即明顯見效", "url": "https://www.youtube.com/watch?v=Zm_9xheHZKg", "channel": "風傳媒 The Storm Media", "views": 2402833}, {"bucket": "6个月内", "title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "url": "https://www.youtube.com/watch?v=hWEUjh-73N8", "channel": "养生老郑", "views": 1627912}, {"bucket": "1年以上", "title": "脊椎肩頸僵硬不可不知的保健方法 - 脊椎保健操 ｜謝教授談脊椎", "url": "https://www.youtube.com/watch?v=L4yOGKbAOKw", "channel": "謝教授 談脊椎", "views": 1562284}, {"bucket": "1年以上", "title": "每天20下讓你強心臟！ 75歲婦人爬梯不再喘！【聚焦2.0】第432集", "url": "https://www.youtube.com/watch?v=v4lAuh4V7bk", "channel": "聚焦2.0", "views": 1332876}, {"bucket": "1年以上", "title": "醫教你\"六招\"恢復眼睛健康 不用吃藥動手術｜這\"兩種\"食物能預防白內障｜每天做\"這動作\"21下 幫助...", "url": "https://www.youtube.com/watch?v=1FzHkrpLGzk", "channel": "健康我+1", "views": 1195082}, {"bucket": "1年以上", "title": "【醫道心傳】🌟頸椎自我復健法升級版！頭暈頭痛 手麻 耳鳴 高血壓 睡眠障礙 吞嚥困難 眼腦部退化  ...", "url": "https://www.youtube.com/watch?v=JMT3S5nWD2A", "channel": "健康源", "views": 1131048}, {"bucket": "1年以上", "title": "逆轉退化性關節炎！不吃藥 / 不打針治關節炎…先戒這2種食物", "url": "https://www.youtube.com/watch?v=T2cKIhGxCKo", "channel": "常常好食Good Food", "views": 891407}, {"bucket": "1年以上", "title": "4 Steps to Lower Uric Acid Levels Effectively (Non...", "url": "https://www.youtube.com/watch?v=nUVyo-2dFWc", "channel": "鹏哥谈健康", "views": 826403}, {"bucket": "1年内", "title": "苹果煮水喝，调理一身小毛病 #中医 #养生 #消化不良 #肝火旺", "url": "https://www.youtube.com/watch?v=QrSFzBaO3mI", "channel": "中医王芹", "views": 776079}, {"bucket": "1年以上", "title": "性功能正常的男性，也能吃「壯陽藥」？泌尿科醫師曝：性行為前X小時食用效果最好！", "url": "https://www.youtube.com/watch?v=jhFzQVjJPfI", "channel": "健康多1點 HEALTH PLUS", "views": 687196}, {"bucket": "1年以上", "title": "「坐」出攝護腺肥大 名中醫靠「兩招」半年恢復！【聚焦2.0】第467集", "url": "https://www.youtube.com/watch?v=ULPwrXqlne0", "channel": "聚焦2.0", "views": 653260}, {"bucket": "90天内", "title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc", "channel": "laxnetcm", "views": 644114}, {"bucket": "1年以上", "title": "【运动康复】10分钟膝盖保健运动，缓解疼痛僵硬--中级版｜物理治疗", "url": "https://www.youtube.com/watch?v=fpZZcHqQdSk", "channel": "Balance Health", "views": 595728}, {"bucket": "1年以上", "title": "膝蓋痛先別深蹲！1動作強化膝關節，對膝蓋最沒負擔 | 健康1+1 遇見更好的自己", "url": "https://www.youtube.com/watch?v=BGWtEk5c4-8", "channel": "健康1+1 · 直播", "views": 591967}, {"bucket": "1年以上", "title": "4 Nutrients Beneficial for Enlarged Prostate", "url": "https://www.youtube.com/watch?v=5-KHWaV0sBM", "channel": "鹏哥谈健康", "views": 576896}, {"bucket": "1年以上", "title": "這樣吃薑黃  效果2000% | 健康1+1 · 直播精選", "url": "https://www.youtube.com/watch?v=TJxMP9mw790", "channel": "健康1+1 · 直播", "views": 481752}, {"bucket": "1年以上", "title": "腳踝扭傷好不了? 5招超實用保健方法_物理治療師Ryan｜KingNet國家網路醫藥", "url": "https://www.youtube.com/watch?v=ehCuok-0-ZQ", "channel": "KingNet國家網路醫藥", "views": 453276}, {"bucket": "1年以上", "title": "《刷牙歌》飯後睡前刷刷牙，白白牙齒好乾淨！｜樂樂TV", "url": "https://www.youtube.com/watch?v=L9rSra5x6qQ", "channel": "樂樂TV", "views": 442813}, {"bucket": "1年以上", "title": "飛蚊症如何預防 | 4步驟保養眼睛 遠離視網膜剝離! | 眼科吳佩昌醫師 | 健康好方法 #飛蚊症#...", "url": "https://www.youtube.com/watch?v=G2LnR47qgsU", "channel": "健康好方法", "views": 421828}]};
+
+            // 生成YouTube搜索链接
+            function getChannelSearchUrl(channelName) {
+                return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(channelName);
+            }
+
+            // 近期爆款过滤
+            function filterRecentViral(window) {
+                // 更新标签状态
+                document.querySelectorAll('#recentViralTabs .time-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.textContent === window);
+                });
+
+                // 渲染表格
+                const tbody = document.getElementById('recentViralBody');
+                const items = recentViralData[window] || [];
+                tbody.innerHTML = items.slice(0, 10).map(v => `
+                    <tr>
+                        <td><span class="badge badge-purple">${v.window}</span></td>
+                        <td><a href="${v.url || '#'}" target="_blank" class="video-link">${(v.title || '').substring(0, 40)}...</a></td>
+                        <td><a href="${getChannelSearchUrl(v.channel)}" target="_blank" class="channel-link">${(v.channel || '').substring(0, 20)}</a></td>
+                        <td>${(v.views || 0).toLocaleString()}</td>
+                        <td>${(v.daily_growth || 0).toLocaleString()}</td>
+                        <td>${v.published_at || ''}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // 高增长过滤
+            function filterHighGrowth(window) {
+                document.querySelectorAll('#highGrowthTabs .time-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.textContent === window);
+                });
+
+                const tbody = document.getElementById('highGrowthBody');
+                const items = highGrowthData[window] || [];
+                tbody.innerHTML = items.slice(0, 10).map(v => `
+                    <tr>
+                        <td><span class="badge badge-green">${v.bucket}</span></td>
+                        <td><a href="${v.url || '#'}" target="_blank" class="video-link">${(v.title || '').substring(0, 40)}...</a></td>
+                        <td><a href="${getChannelSearchUrl(v.channel)}" target="_blank" class="channel-link">${(v.channel || '').substring(0, 20)}</a></td>
+                        <td>${(v.views || 0).toLocaleString()}</td>
+                        <td><strong>${(v.daily_growth || 0).toLocaleString()}</strong></td>
+                    </tr>
+                `).join('');
+            }
+
+            // 小频道过滤
+            function filterSmallChannel(window) {
+                document.querySelectorAll('#smallChannelTabs .time-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.textContent === window);
+                });
+
+                const tbody = document.getElementById('smallChannelBody');
+                const items = smallChannelData[window] || [];
+                tbody.innerHTML = items.slice(0, 10).map(v => `
+                    <tr>
+                        <td><span class="badge badge-blue">${v.bucket}</span></td>
+                        <td><a href="${getChannelSearchUrl(v.channel)}" target="_blank" class="channel-link">${(v.channel || '').substring(0, 20)}</a></td>
+                        <td><a href="${v.url || '#'}" target="_blank" class="video-link">${(v.title || '').substring(0, 35)}...</a></td>
+                        <td>${(v.views || 0).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // 初始化显示全部
+            document.addEventListener('DOMContentLoaded', function() {
+                filterRecentViral('全部');
+                filterHighGrowth('全部');
+                filterSmallChannel('全部');
+            });
+
+            // 增长趋势图数据
+            const trendData = {"1天内": {"labels": ["22:00"], "cumulative_views": [145047], "daily_growth": [145047], "summary": {"total_growth": 145047, "avg_daily": 145047, "peak_daily": 145047, "video_count": 20, "time_window": "1天内"}}, "15天内": {"labels": ["01/03", "01/04", "01/05", "01/06", "01/07", "01/08", "01/09", "01/10", "01/11", "01/12", "01/13", "01/14", "01/15", "01/16", "01/17"], "cumulative_views": [8755, 21387, 36229, 50194, 59835, 69106, 78038, 92641, 103456, 117082, 130083, 140875, 154490, 168792, 177525], "daily_growth": [8755, 12632, 14842, 13965, 9641, 9271, 8932, 14603, 10815, 13626, 13001, 10792, 13615, 14302, 8733], "summary": {"total_growth": 177525, "avg_daily": 11835, "peak_daily": 14842, "video_count": 20, "time_window": "15天内"}}, "30天内": {"labels": ["12/19", "12/20", "12/21", "12/22", "12/23", "12/24", "12/25", "12/26", "12/27", "12/28", "12/29", "12/30", "12/31", "01/01", "01/02", "01/03", "01/04", "01/05", "01/06", "01/07", "01/08", "01/09", "01/10", "01/11", "01/12", "01/13", "01/14", "01/15", "01/16", "01/17"], "cumulative_views": [6428, 10677, 18330, 26007, 33197, 38660, 46241, 53931, 61503, 67107, 72631, 78290, 85793, 91022, 97027, 102556, 108197, 112889, 117873, 124425, 131372, 137542, 142774, 149799, 155387, 161741, 168207, 174560, 181605, 188815], "daily_growth": [6428, 4249, 7653, 7677, 7190, 5463, 7581, 7690, 7572, 5604, 5524, 5659, 7503, 5229, 6005, 5529, 5641, 4692, 4984, 6552, 6947, 6170, 5232, 7025, 5588, 6354, 6466, 6353, 7045, 7210], "summary": {"total_growth": 188815, "avg_daily": 6293, "peak_daily": 7690, "video_count": 20, "time_window": "30天内"}}};
+            let growthTrendChart = null;
+
+            // 切换趋势图时间窗口
+            function switchTrendChart(window) {
+                // 更新标签状态
+                document.querySelectorAll('#trendChartTabs .time-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.textContent === window);
+                });
+
+                // 获取数据
+                const data = trendData[window] || {};
+
+                // 更新图表
+                if (growthTrendChart) {
+                    growthTrendChart.destroy();
+                }
+
+                const ctx = document.getElementById('growthTrendChart');
+                if (ctx && data.labels && data.labels.length > 0) {
+                    growthTrendChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [
+                                {
+                                    label: '累计播放量',
+                                    data: data.cumulative_views,
+                                    borderColor: '#667eea',
+                                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    yAxisID: 'y',
+                                },
+                                {
+                                    label: '日增长',
+                                    data: data.daily_growth,
+                                    borderColor: '#f5576c',
+                                    backgroundColor: 'rgba(245, 87, 108, 0.3)',
+                                    fill: true,
+                                    tension: 0.3,
+                                    yAxisID: 'y1',
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: '累计播放量'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: '日增长'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    },
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 更新统计摘要
+                const summary = data.summary || {};
+                document.getElementById('trendTotalGrowth').textContent =
+                    (summary.total_growth || 0).toLocaleString();
+                document.getElementById('trendAvgDaily').textContent =
+                    (summary.avg_daily || 0).toLocaleString();
+                document.getElementById('trendPeakDay').textContent =
+                    (summary.peak_daily || 0).toLocaleString();
+                document.getElementById('trendVideoCount').textContent =
+                    (summary.video_count || 0).toLocaleString();
+            }
+
+            // 当切换到机会页时初始化
+            const originalShowTab = window.showTab;
+            window.showTab = function(tabId) {
+                originalShowTab(tabId);
+                if (tabId === 'opportunities') {
+                    setTimeout(() => {
+                        filterRecentViral('全部');
+                        filterHighGrowth('全部');
+                        filterSmallChannel('全部');
+                        switchTrendChart('30天内');
+                    }, 100);
+                }
+            };
+        </script>
+        
+        </div>
+
+        <!-- 内容分析页 -->
+        <div id="content" class="tab-content">
+            
+        <div class="grid-2">
+            <div class="chart-container">
+                <div class="chart-title">⏱️ 视频时长分布</div>
+                <div class="chart-wrapper">
+                    <canvas id="durationChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">🏷️ 关键词分布</div>
+                <div class="chart-wrapper">
+                    <canvas id="keywordChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="chart-title">⚡ 潜在爆款视频（异常高播放量）</div>
+            <table>
+                <thead>
+                    <tr><th>标题</th><th>频道</th><th>播放量</th><th>Z-Score</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        </div>
+    </div>
+
+    <script>
+        const DATA = {"total_videos": 1020, "total_views": 65304549, "avg_views": 64024, "median_views": 2330, "total_channels": 476, "top10_share": 62.6, "top20_share": 81.0, "channel_size_dist": [363, 87, 15, 11], "top_channels": [{"channel": "赵宇昊教授", "video_count": 141, "total_views": 9537436, "avg_views": 67641}, {"channel": "健康2.0", "video_count": 17, "total_views": 6338660, "avg_views": 372862}, {"channel": "風傳媒 The Storm Media", "video_count": 2, "total_views": 6336754, "avg_views": 3168377}, {"channel": "Laxne", "video_count": 12, "total_views": 4833579, "avg_views": 402798}, {"channel": "早安健康", "video_count": 4, "total_views": 3624087, "avg_views": 906021}, {"channel": "laxne", "video_count": 12, "total_views": 2697645, "avg_views": 224803}, {"channel": "灵月的养生手记", "video_count": 43, "total_views": 2212177, "avg_views": 51445}, {"channel": "聚焦2.0", "video_count": 3, "total_views": 2112502, "avg_views": 704167}, {"channel": "养生老郑", "video_count": 3, "total_views": 1655797, "avg_views": 551932}, {"channel": "謝教授 談脊椎", "video_count": 1, "total_views": 1562284, "avg_views": 1562284}], "view_tiers": [17, 102, 204, 295, 402], "viral_rate": 1.67, "top10_threshold": 122035, "has_dates": true, "videos_with_date": 100, "date_coverage": 9.8, "date_earliest": "2016-07-19", "date_latest": "2025-12-23", "date_span": "9年5个月", "time_buckets": {"labels": ["24小时内", "7天内", "30天内", "90天内", "6个月内", "1年内", "1年以上"], "values": [0, 0, 1, 14, 27, 48, 52]}, "yearly_trend": {"years": ["2016", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "counts": [1, 3, 4, 4, 7, 15, 8, 10, 48], "views": [222800, 5270045, 2737897, 2263370, 2692218, 9702870, 7704686, 4375939, 20573440]}, "weekday_dist": [12, 15, 10, 15, 25, 12, 11], "opportunities": {"analysis_time": "2026-01-18 22:49:39", "data_time_range": {"videos_with_date": 100, "earliest": "2016-07-19", "latest": "2025-12-23"}, "recent_viral_by_window": {"30天内": {"video_count": 1, "total_views": 1133521, "avg_views": 1133521, "top_performers": [{"title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "channel": "laxne", "views": 1133521, "published_at": "2025-12-23", "days_old": 26, "daily_growth": 43596, "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ"}]}, "90天内": {"video_count": 14, "total_views": 8034311, "avg_views": 573879, "top_performers": [{"title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "channel": "Laxne", "views": 1477049, "published_at": "2025-10-23", "days_old": 87, "daily_growth": 16977, "url": "https://www.youtube.com/watch?v=amXv4nPkagI"}, {"title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #T...", "channel": "Laxne", "views": 1282306, "published_at": "2025-10-22", "days_old": 88, "daily_growth": 14571, "url": "https://www.youtube.com/watch?v=xNREi02Yf_c"}, {"title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "channel": "laxne", "views": 1133521, "published_at": "2025-12-23", "days_old": 26, "daily_growth": 43596, "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ"}, {"title": "不同胃疼代表什么?#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TC...", "channel": "Laxne", "views": 1054501, "published_at": "2025-10-21", "days_old": 89, "daily_growth": 11848, "url": "https://www.youtube.com/watch?v=K1Nh0SMNwk4"}, {"title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "channel": "laxnetcm", "views": 644114, "published_at": "2025-10-22", "days_old": 88, "daily_growth": 7319, "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc"}, {"title": "晚上夜尿多记好一个土方子#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 ...", "channel": "laxne", "views": 558689, "published_at": "2025-12-14", "days_old": 35, "daily_growth": 15962, "url": "https://www.youtube.com/watch?v=FTzDu5D8_UM"}, {"title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "channel": "laxne", "views": 538517, "published_at": "2025-11-11", "days_old": 68, "daily_growth": 7919, "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw"}, {"title": "老化研究專家：科學上唯一證實有效抗老的方式，一毛錢都不必花｜【初日會客室】許翱麟 教授", "channel": "Cofit x 宋晏仁醫師 - 初日醫學", "views": 272725, "published_at": "2025-12-17", "days_old": 32, "daily_growth": 8522, "url": "https://www.youtube.com/watch?v=E8TWhte2huc"}, {"title": "#健康科普", "channel": "赵宇昊教授", "views": 218017, "published_at": "2025-12-09", "days_old": 40, "daily_growth": 5450, "url": "https://www.youtube.com/watch?v=1jA4StFqmes"}, {"title": "安睡饮#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM #中医学...", "channel": "Laxne", "views": 216829, "published_at": "2025-10-22", "days_old": 88, "daily_growth": 2463, "url": "https://www.youtube.com/watch?v=KNqvbAf6r3E"}]}, "6个月内": {"video_count": 27, "total_views": 13276095, "avg_views": 491707, "top_performers": [{"title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "channel": "养生老郑", "views": 1627912, "published_at": "2025-09-10", "days_old": 130, "daily_growth": 12522, "url": "https://www.youtube.com/watch?v=hWEUjh-73N8"}, {"title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "channel": "Laxne", "views": 1477049, "published_at": "2025-10-23", "days_old": 87, "daily_growth": 16977, "url": "https://www.youtube.com/watch?v=amXv4nPkagI"}, {"title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #T...", "channel": "Laxne", "views": 1282306, "published_at": "2025-10-22", "days_old": 88, "daily_growth": 14571, "url": "https://www.youtube.com/watch?v=xNREi02Yf_c"}, {"title": "#健康科普 #抖出健康知识宝藏 #科普 #医学科普 #昆明", "channel": "Zen Tao Health", "views": 1249240, "published_at": "2025-08-19", "days_old": 152, "daily_growth": 8218, "url": "https://www.youtube.com/watch?v=aMw6KqI5sSI"}, {"title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "channel": "laxne", "views": 1133521, "published_at": "2025-12-23", "days_old": 26, "daily_growth": 43596, "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ"}, {"title": "不同胃疼代表什么?#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TC...", "channel": "Laxne", "views": 1054501, "published_at": "2025-10-21", "days_old": 89, "daily_growth": 11848, "url": "https://www.youtube.com/watch?v=K1Nh0SMNwk4"}, {"title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "channel": "laxnetcm", "views": 644114, "published_at": "2025-10-22", "days_old": 88, "daily_growth": 7319, "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc"}, {"title": "晚上夜尿多记好一个土方子#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 ...", "channel": "laxne", "views": 558689, "published_at": "2025-12-14", "days_old": 35, "daily_growth": 15962, "url": "https://www.youtube.com/watch?v=FTzDu5D8_UM"}, {"title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "channel": "laxne", "views": 538517, "published_at": "2025-11-11", "days_old": 68, "daily_growth": 7919, "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw"}, {"title": "108岁老奶奶透露出的长寿秘诀。#生活小常识 #养生之道 #健康好生活", "channel": "山村姑娘", "views": 385580, "published_at": "2025-07-27", "days_old": 175, "daily_growth": 2203, "url": "https://www.youtube.com/watch?v=g0oHGDSaxw4"}]}}, "high_daily_growth": {"count": 62, "description": "日均播放增长 > 500 且总播放 > 5000 的视频", "top_performers": [{"title": "中医经典好搭档#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM ...", "channel": "laxne", "views": 1133521, "published_at": "2025-12-23", "days_old": 26, "time_bucket": "30天内", "daily_growth": 43596, "url": "https://www.youtube.com/watch?v=vzKW8ksp8rQ"}, {"title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "channel": "Laxne", "views": 1477049, "published_at": "2025-10-23", "days_old": 87, "time_bucket": "90天内", "daily_growth": 16977, "url": "https://www.youtube.com/watch?v=amXv4nPkagI"}, {"title": "晚上夜尿多记好一个土方子#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 ...", "channel": "laxne", "views": 558689, "published_at": "2025-12-14", "days_old": 35, "time_bucket": "90天内", "daily_growth": 15962, "url": "https://www.youtube.com/watch?v=FTzDu5D8_UM"}, {"title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #T...", "channel": "Laxne", "views": 1282306, "published_at": "2025-10-22", "days_old": 88, "time_bucket": "90天内", "daily_growth": 14571, "url": "https://www.youtube.com/watch?v=xNREi02Yf_c"}, {"title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "channel": "养生老郑", "views": 1627912, "published_at": "2025-09-10", "days_old": 130, "time_bucket": "6个月内", "daily_growth": 12522, "url": "https://www.youtube.com/watch?v=hWEUjh-73N8"}, {"title": "不同胃疼代表什么?#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TC...", "channel": "Laxne", "views": 1054501, "published_at": "2025-10-21", "days_old": 89, "time_bucket": "90天内", "daily_growth": 11848, "url": "https://www.youtube.com/watch?v=K1Nh0SMNwk4"}, {"title": "老化研究專家：科學上唯一證實有效抗老的方式，一毛錢都不必花｜【初日會客室】許翱麟 教授", "channel": "Cofit x 宋晏仁醫師 - 初日醫學", "views": 272725, "published_at": "2025-12-17", "days_old": 32, "time_bucket": "90天内", "daily_growth": 8522, "url": "https://www.youtube.com/watch?v=E8TWhte2huc"}, {"title": "#健康科普 #抖出健康知识宝藏 #科普 #医学科普 #昆明", "channel": "Zen Tao Health", "views": 1249240, "published_at": "2025-08-19", "days_old": 152, "time_bucket": "6个月内", "daily_growth": 8218, "url": "https://www.youtube.com/watch?v=aMw6KqI5sSI"}, {"title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "channel": "laxne", "views": 538517, "published_at": "2025-11-11", "days_old": 68, "time_bucket": "90天内", "daily_growth": 7919, "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw"}, {"title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "channel": "laxnetcm", "views": 644114, "published_at": "2025-10-22", "days_old": 88, "time_bucket": "90天内", "daily_growth": 7319, "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc"}, {"title": "#健康科普", "channel": "赵宇昊教授", "views": 218017, "published_at": "2025-12-09", "days_old": 40, "time_bucket": "90天内", "daily_growth": 5450, "url": "https://www.youtube.com/watch?v=1jA4StFqmes"}, {"title": "75歲以上長壽秘訣曝光！6條健康指標做到3條，輕鬆活過95歲不費力！", "channel": "健康養生", "views": 215087, "published_at": "2025-11-28", "days_old": 51, "time_bucket": "90天内", "daily_growth": 4217, "url": "https://www.youtube.com/watch?v=rJiYBpHRJvQ"}, {"title": "猪皮、鸡皮能吃吗？ #医学科普 #健康科普在快手 #饮食健康", "channel": "赵宇昊教授", "views": 1015626, "published_at": "2025-05-22", "days_old": 241, "time_bucket": "1年内", "daily_growth": 4214, "url": "https://www.youtube.com/watch?v=Ane4HbERk9Q"}, {"title": "【健康】不吃藥狂降壞膽固醇！名醫曝5大天然食物清血管：三酸肝油酯從600→145！ft.劉博仁醫師｜...", "channel": "風傳媒 The Storm Media", "views": 3933921, "published_at": "2023-05-26", "days_old": 968, "time_bucket": "1年以上", "daily_growth": 4063, "url": "https://www.youtube.com/watch?v=jJnekeWymgg"}, {"title": "皮肤出现这6个表现当心血糖高 #健康科普知识 #暖冬健康指南 #过个快手健康年 #糖尿病", "channel": "赵宇昊教授", "views": 957124, "published_at": "2025-05-25", "days_old": 238, "time_bucket": "1年内", "daily_growth": 4021, "url": "https://www.youtube.com/watch?v=s3eMN8Mgluc"}, {"title": "苹果煮水喝，调理一身小毛病 #中医 #养生 #消化不良 #肝火旺", "channel": "中医王芹", "views": 776079, "published_at": "2025-05-23", "days_old": 240, "time_bucket": "1年内", "daily_growth": 3233, "url": "https://www.youtube.com/watch?v=QrSFzBaO3mI"}, {"title": "安睡饮#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM #中医学...", "channel": "Laxne", "views": 216829, "published_at": "2025-10-22", "days_old": 88, "time_bucket": "90天内", "daily_growth": 2463, "url": "https://www.youtube.com/watch?v=KNqvbAf6r3E"}, {"title": "哪有什么失眠多半是心血不足了中医教你一招#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养...", "channel": "Laxne", "views": 223997, "published_at": "2025-10-17", "days_old": 93, "time_bucket": "6个月内", "daily_growth": 2408, "url": "https://www.youtube.com/watch?v=645m4OAVnmo"}, {"title": "#健康科普知识在快手 #健康科普 #心血管", "channel": "赵宇昊教授", "views": 168797, "published_at": "2025-11-03", "days_old": 76, "time_bucket": "90天内", "daily_growth": 2221, "url": "https://www.youtube.com/watch?v=yyMMbt6iPWE"}, {"title": "108岁老奶奶透露出的长寿秘诀。#生活小常识 #养生之道 #健康好生活", "channel": "山村姑娘", "views": 385580, "published_at": "2025-07-27", "days_old": 175, "time_bucket": "6个月内", "daily_growth": 2203, "url": "https://www.youtube.com/watch?v=g0oHGDSaxw4"}]}, "small_channel_hits": {"count": 114, "description": "1-3个视频的新频道中播放量 > 1万的爆款", "top_performers": [{"title": "【健康】不吃藥狂降壞膽固醇！名醫曝5大天然食物清血管：三酸肝油酯從600→145！ft.劉博仁醫師｜...", "channel": "風傳媒 The Storm Media", "channel_video_count": 2, "views": 3933921, "published_at": "2023-05-26", "days_old": 968, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=jJnekeWymgg"}, {"title": "逆轉腎臟病只要持續2習慣？！專科醫師：三個月即明顯見效", "channel": "風傳媒 The Storm Media", "channel_video_count": 2, "views": 2402833, "published_at": "2022-11-22", "days_old": 1153, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=Zm_9xheHZKg"}, {"title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "channel": "养生老郑", "channel_video_count": 3, "views": 1627912, "published_at": "2025-09-10", "days_old": 130, "time_bucket": "6个月内", "url": "https://www.youtube.com/watch?v=hWEUjh-73N8"}, {"title": "脊椎肩頸僵硬不可不知的保健方法 - 脊椎保健操 ｜謝教授談脊椎", "channel": "謝教授 談脊椎", "channel_video_count": 1, "views": 1562284, "published_at": "2019-08-25", "days_old": 2338, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=L4yOGKbAOKw"}, {"title": "每天20下讓你強心臟！ 75歲婦人爬梯不再喘！【聚焦2.0】第432集", "channel": "聚焦2.0", "channel_video_count": 3, "views": 1332876, "published_at": "2022-03-19", "days_old": 1401, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=v4lAuh4V7bk"}, {"title": "醫教你\"六招\"恢復眼睛健康 不用吃藥動手術｜這\"兩種\"食物能預防白內障｜每天做\"這動作\"21下 幫助...", "channel": "健康我+1", "channel_video_count": 1, "views": 1195082, "published_at": "2023-06-16", "days_old": 947, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=1FzHkrpLGzk"}, {"title": "【醫道心傳】🌟頸椎自我復健法升級版！頭暈頭痛 手麻 耳鳴 高血壓 睡眠障礙 吞嚥困難 眼腦部退化  ...", "channel": "健康源", "channel_video_count": 2, "views": 1131048, "published_at": "2022-01-26", "days_old": 1453, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=JMT3S5nWD2A"}, {"title": "逆轉退化性關節炎！不吃藥 / 不打針治關節炎…先戒這2種食物", "channel": "常常好食Good Food", "channel_video_count": 3, "views": 891407, "published_at": "2023-01-13", "days_old": 1101, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=T2cKIhGxCKo"}, {"title": "4 Steps to Lower Uric Acid Levels Effectively (Non...", "channel": "鹏哥谈健康", "channel_video_count": 2, "views": 826403, "published_at": "2022-07-07", "days_old": 1291, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=nUVyo-2dFWc"}, {"title": "苹果煮水喝，调理一身小毛病 #中医 #养生 #消化不良 #肝火旺", "channel": "中医王芹", "channel_video_count": 2, "views": 776079, "published_at": "2025-05-23", "days_old": 240, "time_bucket": "1年内", "url": "https://www.youtube.com/watch?v=QrSFzBaO3mI"}, {"title": "性功能正常的男性，也能吃「壯陽藥」？泌尿科醫師曝：性行為前X小時食用效果最好！", "channel": "健康多1點 HEALTH PLUS", "channel_video_count": 1, "views": 687196, "published_at": "2022-03-13", "days_old": 1407, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=jhFzQVjJPfI"}, {"title": "「坐」出攝護腺肥大 名中醫靠「兩招」半年恢復！【聚焦2.0】第467集", "channel": "聚焦2.0", "channel_video_count": 3, "views": 653260, "published_at": "2022-12-10", "days_old": 1135, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=ULPwrXqlne0"}, {"title": "再说一次腰疼 腿疼 关节痛给着急乱用药#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生...", "channel": "laxnetcm", "channel_video_count": 3, "views": 644114, "published_at": "2025-10-22", "days_old": 88, "time_bucket": "90天内", "url": "https://www.youtube.com/watch?v=_K-qHZE7pjc"}, {"title": "【运动康复】10分钟膝盖保健运动，缓解疼痛僵硬--中级版｜物理治疗", "channel": "Balance Health", "channel_video_count": 1, "views": 595728, "published_at": "2020-07-03", "days_old": 2025, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=fpZZcHqQdSk"}, {"title": "膝蓋痛先別深蹲！1動作強化膝關節，對膝蓋最沒負擔 | 健康1+1 遇見更好的自己", "channel": "健康1+1 · 直播", "channel_video_count": 2, "views": 591967, "published_at": "2020-10-02", "days_old": 1934, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=BGWtEk5c4-8"}, {"title": "4 Nutrients Beneficial for Enlarged Prostate", "channel": "鹏哥谈健康", "channel_video_count": 2, "views": 576896, "published_at": "2022-10-28", "days_old": 1178, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=5-KHWaV0sBM"}, {"title": "這樣吃薑黃  效果2000% | 健康1+1 · 直播精選", "channel": "健康1+1 · 直播", "channel_video_count": 2, "views": 481752, "published_at": "2023-03-16", "days_old": 1039, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=TJxMP9mw790"}, {"title": "腳踝扭傷好不了? 5招超實用保健方法_物理治療師Ryan｜KingNet國家網路醫藥", "channel": "KingNet國家網路醫藥", "channel_video_count": 1, "views": 453276, "published_at": "2019-02-01", "days_old": 2543, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=ehCuok-0-ZQ"}, {"title": "《刷牙歌》飯後睡前刷刷牙，白白牙齒好乾淨！｜樂樂TV", "channel": "樂樂TV", "channel_video_count": 1, "views": 442813, "published_at": "2021-07-06", "days_old": 1657, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=L9rSra5x6qQ"}, {"title": "飛蚊症如何預防 | 4步驟保養眼睛 遠離視網膜剝離! | 眼科吳佩昌醫師 | 健康好方法 #飛蚊症#...", "channel": "健康好方法", "channel_video_count": 1, "views": 421828, "published_at": "2019-11-01", "days_old": 2270, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=G2LnR47qgsU"}]}, "high_engagement_templates": {"count": 23, "description": "互动率 > 3% 的高互动视频（适合 AI 配音）", "top_performers": [{"title": "#脑梗  #心脑血管   #健康科普", "channel": "赵宇昊教授", "views": 122035, "likes": 7655, "comments": 104, "engagement_rate": 6.36, "published_at": "未知", "days_old": null, "time_bucket": "未知", "url": "https://www.youtube.com/watch?v=5ZUC49B6AC0"}, {"title": "大家知道如何妙用山楂吗#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #...", "channel": "Laxne", "views": 128263, "likes": 6869, "comments": 649, "engagement_rate": 5.86, "published_at": "2025-10-21", "days_old": 89, "time_bucket": "90天内", "url": "https://www.youtube.com/watch?v=osNSr9vwAJ8"}, {"title": "想要恢复肺功能自开水里泡两物肺一天比一天好#中医药文化 #中医养生 #中药材 #中医传承 #中医 #...", "channel": "Laxne", "views": 157787, "likes": 8234, "comments": 159, "engagement_rate": 5.32, "published_at": "2025-10-13", "days_old": 97, "time_bucket": "6个月内", "url": "https://www.youtube.com/watch?v=K5eE4cUxWLY"}, {"title": "#健康 #科普", "channel": "赵宇昊教授", "views": 424827, "likes": 22370, "comments": 57, "engagement_rate": 5.28, "published_at": "2025-02-02", "days_old": 350, "time_bucket": "1年内", "url": "https://www.youtube.com/watch?v=_4pVzQIlI8A"}, {"title": "#健康科普知识在快手 #健康科普 #心血管", "channel": "赵宇昊教授", "views": 168797, "likes": 8032, "comments": 63, "engagement_rate": 4.8, "published_at": "2025-11-03", "days_old": 76, "time_bucket": "90天内", "url": "https://www.youtube.com/watch?v=yyMMbt6iPWE"}, {"title": "眼睛亮亮 你试一下 #中医#养生#居家锻炼#小动作大作用#近视", "channel": "灵月的养生手记", "views": 258776, "likes": 11964, "comments": 233, "engagement_rate": 4.71, "published_at": "2025-08-16", "days_old": 155, "time_bucket": "6个月内", "url": "https://www.youtube.com/watch?v=SIVCOoOtzx4"}, {"title": "妙用吹风机赛过老中翳 #中医#养生#居家锻炼#灵月#吹风机", "channel": "灵月的养生手记", "views": 211604, "likes": 9824, "comments": 59, "engagement_rate": 4.67, "published_at": "2025-07-25", "days_old": 177, "time_bucket": "6个月内", "url": "https://www.youtube.com/watch?v=f2dlRrqiGDU"}, {"title": "#健康科普在快手   #清血管  #心脑血管疾病预防   #chinesemedicine #科普", "channel": "赵宇昊教授", "views": 144308, "likes": 6513, "comments": 56, "engagement_rate": 4.55, "published_at": "2024-06-21", "days_old": 576, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=XE8mCmcAN8A"}, {"title": "香菜根汤 #中医 #中國醫#吃出健康好身体#中医#健康科普 #生活小常识与健康#健康养生#营养#健康...", "channel": "中医健康养生", "views": 464264, "likes": 19806, "comments": 129, "engagement_rate": 4.29, "published_at": "2025-03-08", "days_old": 316, "time_bucket": "1年内", "url": "https://www.youtube.com/watch?v=eCjtUGrwAco"}, {"title": "這兩個動作讓你健康又長壽 #健康 #健康科普 #涨知识 #中医 #中醫 #医学科普 #知识分享 #科...", "channel": "WeCare Holistic 全心全醫", "views": 413572, "likes": 17456, "comments": 27, "engagement_rate": 4.23, "published_at": "2023-08-17", "days_old": 885, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=8u4joLbtyjc"}, {"title": "晚上做运动 我首选这个动作 推荐给你 #中医  #养生  #居家锻炼 #小动作大作用", "channel": "灵月的养生手记", "views": 125896, "likes": 5100, "comments": 216, "engagement_rate": 4.22, "published_at": "2025-10-22", "days_old": 88, "time_bucket": "90天内", "url": "https://www.youtube.com/watch?v=6Cx8m3pwcs4"}, {"title": "东方古法内调外练头发乌黑亮丽 #中医 #养生 #居家锻炼 #灵月 #白发", "channel": "灵月的养生手记", "views": 193762, "likes": 7848, "comments": 40, "engagement_rate": 4.07, "published_at": "2025-06-16", "days_old": 216, "time_bucket": "1年内", "url": "https://www.youtube.com/watch?v=CZPqce4Fj_I"}, {"title": "躺在床上就能养氣皿的动作 #中医#养生#中医养生#居家锻炼#气血", "channel": "灵月的养生手记", "views": 297797, "likes": 11511, "comments": 64, "engagement_rate": 3.89, "published_at": "2025-06-19", "days_old": 213, "time_bucket": "1年内", "url": "https://www.youtube.com/watch?v=sVDDnx1X_Pg"}, {"title": "#健康养生 #心血管 #健康科普在", "channel": "赵宇昊教授", "views": 260062, "likes": 9886, "comments": 36, "engagement_rate": 3.82, "published_at": "2024-04-15", "days_old": 643, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=dRkOT5dGEKk"}, {"title": "#健康科普 #抖出健康知识宝藏 #科普 #医学科普 #昆明", "channel": "Zen Tao Health", "views": 1249240, "likes": 45214, "comments": 351, "engagement_rate": 3.65, "published_at": "2025-08-19", "days_old": 152, "time_bucket": "6个月内", "url": "https://www.youtube.com/watch?v=aMw6KqI5sSI"}, {"title": "#心脑血管  #健康科普  #心脏", "channel": "赵宇昊教授", "views": 187545, "likes": 6350, "comments": 11, "engagement_rate": 3.39, "published_at": "2024-10-15", "days_old": 460, "time_bucket": "1年以上", "url": "https://www.youtube.com/watch?v=1HVIk6H4MSs"}, {"title": "用黄芪煮水喝，帮助补气升阳#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药...", "channel": "laxne", "views": 168873, "likes": 5541, "comments": 70, "engagement_rate": 3.32, "published_at": "2025-10-14", "days_old": 96, "time_bucket": "6个月内", "url": "https://www.youtube.com/watch?v=IRVaw_RKQHU"}, {"title": "75歲以上長壽秘訣曝光！6條健康指標做到3條，輕鬆活過95歲不費力！", "channel": "健康養生", "views": 215087, "likes": 6768, "comments": 315, "engagement_rate": 3.29, "published_at": "2025-11-28", "days_old": 51, "time_bucket": "90天内", "url": "https://www.youtube.com/watch?v=rJiYBpHRJvQ"}, {"title": "秋天苹果煮水这样喝赛过人参汤#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中...", "channel": "laxne", "views": 538517, "likes": 17324, "comments": 188, "engagement_rate": 3.25, "published_at": "2025-11-11", "days_old": 68, "time_bucket": "90天内", "url": "https://www.youtube.com/watch?v=Qjp8mCyATMw"}, {"title": "脾虚人丑来做曲黎敏老师推荐的摇胯建脾操 #中医#养生#居家锻炼#灵月#脾胃", "channel": "灵月的养生手记", "views": 176911, "likes": 5691, "comments": 36, "engagement_rate": 3.24, "published_at": "2025-07-20", "days_old": 182, "time_bucket": "1年内", "url": "https://www.youtube.com/watch?v=hZJq5OQc0XI"}]}, "opportunity_summary": {"opportunities_by_time": {"30天内": 1, "90天内": 16, "6个月内": 15, "1年内": 22, "1年以上": 44}, "best_time_window": "1年以上", "recommendations": ["高增长视频日均播放 14,745，存在快速起量机会", "近90天有 3 个小频道爆款，新频道有机会", "发现 23 个高互动模板，适合 AI 配音复制"], "action_items": ["优先模仿 30 天内的近期爆款", "关注日增长 > 1000 的高速增长视频", "参考小频道爆款的选题和标题", "使用高互动率视频作为 AI 配音模板"]}}, "duration": {"labels": ["< 1分钟", "1-3分钟", "3-5分钟", "5-10分钟", "10-20分钟", "20-60分钟", "> 1小时"], "counts": [395, 308, 92, 94, 58, 67, 6]}, "keywords": {"labels": ["健康科普", "长寿秘诀", "中医养生", "养生误区", "保健方法"], "values": [246, 210, 201, 197, 166]}, "anomalies": [], "insights": ["数据集包含 1020 个视频，总播放量 65,304,549", "播放量分布呈明显右偏（均值 64,024 >> 中位数 2,327.5），存在头部效应", "最常见的标题模式是「question」类型，占比 16.1%", "最佳视频时长区间为「20-60分钟」，该区间视频平均播放量最高", "头部频道「赵宇昊教授」贡献了最多播放量（9,537,436）", "主导内容类型是「中药养生」，占总播放量的较大比例", "识别出 165 个异常高播放量视频（潜在爆款），值得深入分析其特征", "整体趋势呈「明显下降」态势", "---", "【内容创作建议】", "推荐选题方向：中药养生, 饮食调理, 疾病防治", "建议采用「question」类型的标题模式，表现相对较好", "建议视频时长控制在「20-60分钟」区间"]};
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // 初始化图表
+            if (tabId === 'market') initMarketCharts();
+            if (tabId === 'time') initTimeCharts();
+            if (tabId === 'content') initContentCharts();
+        }
+
+        function initMarketCharts() {
+            // 频道规模分布
+            if (!window.channelSizeChart) {
+                const ctx = document.getElementById('channelSizeChart');
+                if (ctx) {
+                    window.channelSizeChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['单视频频道', '小型(2-4)', '中型(5-9)', '大型(10+)'],
+                            datasets: [{
+                                data: DATA.channel_size_dist,
+                                backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'right' } }
+                        }
+                    });
+                }
+            }
+
+            // 播放量分层
+            if (!window.viewTiersChart) {
+                const ctx = document.getElementById('viewTiersChart');
+                if (ctx) {
+                    window.viewTiersChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['100万+', '10-100万', '1-10万', '1000-1万', '<1000'],
+                            datasets: [{
+                                label: '视频数量',
+                                data: DATA.view_tiers,
+                                backgroundColor: ['#f5576c', '#f093fb', '#667eea', '#4facfe', '#00f2fe']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            indexAxis: 'y',
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }
+        }
+
+        function initTimeCharts() {
+            // 时间分布
+            if (!window.timeDistChart) {
+                const ctx = document.getElementById('timeDistChart');
+                if (ctx) {
+                    window.timeDistChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: DATA.time_buckets.labels,
+                            datasets: [{
+                                label: '视频数量',
+                                data: DATA.time_buckets.values,
+                                backgroundColor: '#667eea'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }
+
+            // 年度趋势
+            if (!window.yearlyChart) {
+                const ctx = document.getElementById('yearlyChart');
+                if (ctx) {
+                    window.yearlyChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: DATA.yearly_trend.years,
+                            datasets: [{
+                                label: '视频数量',
+                                data: DATA.yearly_trend.counts,
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102,126,234,0.1)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+            }
+
+            // 星期分布
+            if (!window.weekdayChart) {
+                const ctx = document.getElementById('weekdayChart');
+                if (ctx) {
+                    window.weekdayChart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                            datasets: [{
+                                label: '发布数量',
+                                data: DATA.weekday_dist,
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102,126,234,0.2)'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                }
+            }
+        }
+
+        function initContentCharts() {
+            // 时长分布
+            if (!window.durationChart) {
+                const ctx = document.getElementById('durationChart');
+                if (ctx && DATA.duration) {
+                    window.durationChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: DATA.duration.labels,
+                            datasets: [{
+                                label: '视频数量',
+                                data: DATA.duration.counts,
+                                backgroundColor: '#667eea'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }
+
+            // 关键词分布
+            if (!window.keywordChart) {
+                const ctx = document.getElementById('keywordChart');
+                if (ctx && DATA.keywords) {
+                    window.keywordChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: DATA.keywords.labels,
+                            datasets: [{
+                                data: DATA.keywords.values,
+                                backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'right' } }
+                        }
+                    });
+                }
+            }
+        }
+
+        // 全局时间过滤器
+        let currentGlobalTimeFilter = '30天内';
+
+        function setGlobalTimeFilter(timeWindow) {
+            currentGlobalTimeFilter = timeWindow;
+
+            // 更新按钮状态
+            document.querySelectorAll('.time-filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === timeWindow);
+            });
+
+            // 更新时间范围指示器
+            updateTimeRangeIndicator(timeWindow);
+
+            // 触发所有页面的数据更新
+            applyGlobalTimeFilter(timeWindow);
+        }
+
+        function updateTimeRangeIndicator(timeWindow) {
+            let indicator = document.getElementById('timeRangeIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'timeRangeIndicator';
+                indicator.className = 'time-range-indicator';
+                document.body.appendChild(indicator);
+            }
+            indicator.textContent = `当前数据范围: ${timeWindow}`;
+        }
+
+        function applyGlobalTimeFilter(timeWindow) {
+            // 映射到内部使用的时间窗口
+            const internalWindow = timeWindow === '全部' ? '全部' : timeWindow;
+
+            // 更新概览页的统计（如果在概览页）
+            updateOverviewStats(timeWindow);
+
+            // 更新AI创作机会页的各个表格
+            if (typeof filterRecentViral === 'function') {
+                filterRecentViral(internalWindow);
+            }
+            if (typeof filterHighGrowth === 'function') {
+                filterHighGrowth(internalWindow);
+            }
+            if (typeof filterSmallChannel === 'function') {
+                filterSmallChannel(internalWindow);
+            }
+            if (typeof switchTrendChart === 'function') {
+                switchTrendChart(internalWindow);
+            }
+
+            // 同步更新子标签页的选中状态
+            syncSubTabsState(internalWindow);
+        }
+
+        function syncSubTabsState(timeWindow) {
+            // 同步所有子标签页的选中状态
+            ['recentViralTabs', 'highGrowthTabs', 'smallChannelTabs', 'trendChartTabs'].forEach(tabsId => {
+                const tabs = document.getElementById(tabsId);
+                if (tabs) {
+                    tabs.querySelectorAll('.time-tab').forEach(tab => {
+                        tab.classList.toggle('active', tab.textContent === timeWindow);
+                    });
+                }
+            });
+        }
+
+        function updateOverviewStats(timeWindow) {
+            // 根据时间窗口更新概览统计
+            // 这里可以扩展为从 DATA 中筛选特定时间范围的数据
+            const statsContainer = document.querySelector('#overview .cards');
+            if (statsContainer && timeWindow !== '全部') {
+                // 显示时间范围提示
+                let notice = document.getElementById('timeFilterNotice');
+                if (!notice) {
+                    notice = document.createElement('div');
+                    notice.id = 'timeFilterNotice';
+                    notice.style.cssText = 'background: #fff3cd; color: #856404; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px;';
+                    statsContainer.parentNode.insertBefore(notice, statsContainer);
+                }
+                notice.innerHTML = `<strong>📅 当前筛选:</strong> 仅显示 <strong>${timeWindow}</strong> 的数据。AI创作机会页已同步更新。`;
+            } else {
+                const notice = document.getElementById('timeFilterNotice');
+                if (notice) notice.remove();
+            }
+        }
+
+        // 初始化时间范围指示器
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimeRangeIndicator('30天内');
+        });
+    </script>
+</body>
+</html>

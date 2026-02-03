@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube 视频分析报告</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #f5f5f5; }
+        .card { margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card { text-align: center; padding: 20px; }
+        .stat-card h3 { font-size: 2rem; color: #2196F3; margin: 0; }
+        .stat-card p { color: #666; margin: 5px 0 0 0; }
+        .chart-container { position: relative; height: 300px; }
+        .insight-list { list-style-type: none; padding-left: 0; }
+        .insight-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .insight-list li:before { content: "💡 "; }
+        .viral-table { font-size: 0.9rem; }
+        .word-cloud { display: flex; flex-wrap: wrap; gap: 8px; padding: 15px; }
+        .word-cloud span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 5px 12px; border-radius: 20px;
+        }
+        .header-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 30px; margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-banner">
+        <div class="container">
+            <h1>📊 YouTube 视频分析报告</h1>
+            <p class="mb-0">生成时间: 2026-01-18T22:32:34.324128 | 分析视频数: 1020</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 核心指标卡片 -->
+        <div class="row" id="stat-cards">
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <h3 id="card-videos">-</h3>
+                    <p>总视频数</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <h3 id="card-views">-</h3>
+                    <p>总播放量</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <h3 id="card-avg">-</h3>
+                    <p>平均播放</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <h3 id="card-median">-</h3>
+                    <p>中位数</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <h3 id="card-channels">-</h3>
+                    <p>频道数</p>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card stat-card">
+                    <h3 id="card-details">-</h3>
+                    <p>有详情</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 关键词分布 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">🔑 关键词分布</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="keywordChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 内容聚类 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">📂 内容主题分布</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="clusterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 时长分析 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">⏱️ 视频时长分析</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="durationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标题模式 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">📝 标题模式分析</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="patternChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 频道排名 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">🏆 头部频道排名</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="channelChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 趋势分析 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">📈 月度趋势</div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 高频词 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">💬 标题高频词</div>
+                    <div class="card-body word-cloud" id="wordCloud">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 洞察与建议 -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">💡 分析洞察与建议</div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <ul class="insight-list">
+                            <li>数据集包含 1020 个视频，总播放量 65,304,549</li>
+<li>播放量分布呈明显右偏（均值 64,024 >> 中位数 2,327.5），存在头部效应</li>
+<li>最常见的标题模式是「question」类型，占比 16.1%</li>
+<li>最佳视频时长区间为「20-60分钟」，该区间视频平均播放量最高</li>
+<li>头部频道「赵宇昊教授」贡献了最多播放量（9,537,436）</li>
+<li>主导内容类型是「中药养生」，占总播放量的较大比例</li>
+<li>识别出 165 个异常高播放量视频（潜在爆款），值得深入分析其特征</li>
+<li>整体趋势呈「明显下降」态势</li>
+<hr class="my-3">
+<h5 class="text-primary mt-3">【内容创作建议】</h5>
+<li>推荐选题方向：中药养生, 饮食调理, 疾病防治</li>
+<li>建议采用「question」类型的标题模式，表现相对较好</li>
+<li>建议视频时长控制在「20-60分钟」区间</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 爆款视频 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">🔥 潜在爆款视频（异常高播放量）</div>
+                    <div class="card-body">
+                        <table class="table table-striped viral-table" id="viralTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>标题</th>
+                                    <th>播放量</th>
+                                    <th>频道</th>
+                                    <th>Z分数</th>
+                                    <th>链接</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据
+        const DATA = {"cards": {"total_videos": 1020, "total_views": 65304549, "avg_views": 64024, "median_views": 2327.5, "total_channels": 476, "with_details": 106}, "keywords": {"labels": ["健康科普", "长寿秘诀", "中医养生", "养生误区", "保健方法"], "values": [246, 210, 201, 197, 166]}, "duration": {"labels": ["< 1分钟", "1-3分钟", "3-5分钟", "5-10分钟", "10-20分钟", "20-60分钟", "> 1小时"], "counts": [395, 308, 92, 94, 58, 67, 6], "avg_views": [53087, 52072, 53950, 113802, 76237, 122567, 267]}, "title_patterns": {"labels": ["question", "number", "emotion", "authority", "urgency", "contrast", "list", "personal"], "values": [164, 98, 37, 109, 5, 15, 6, 72]}, "top_words": {"养生": 299, "中医": 244, "健康": 227, "健康科普": 148, "科普": 126, "中医养生": 125, "长寿秘诀": 123, "医学科普": 76, "健康养生": 75, "长寿": 71, "运动": 59, "饮食": 58, "健身": 47, "营养": 46, "养生误区": 46, "涨知识": 45, "养生秘诀": 45, "養生": 42, "科学饮食": 40, "营养与健康": 40, "居家锻炼": 39, "运动与健康": 37, "营养与养生": 36, "运动与养生": 36, "养生长寿秘诀": 36, "养生知识": 34, "中医传承": 33, "中药": 33, "健康科普知识": 33, "中醫": 33}, "clusters": {"labels": ["中药养生", "饮食调理", "其他", "疾病防治", "器官保健", "穴位按摩", "长寿秘诀", "运动健身", "生活习惯"], "counts": [271, 136, 267, 59, 104, 45, 101, 23, 14], "avg_views": [68136, 107855, 54627, 120374, 50884, 69907, 10794, 37240, 7056]}, "channels": {"labels": ["赵宇昊教授", "健康2.0", "風傳媒 The Storm M", "Laxne", "早安健康", "laxne", "灵月的养生手记", "聚焦2.0", "养生老郑", "謝教授 談脊椎"], "total_views": [9537436, 6338660, 6336754, 4833579, 3624087, 2697645, 2212177, 2112502, 1655797, 1562284], "video_count": [141, 17, 2, 12, 4, 12, 43, 3, 3, 1]}, "trends": {"labels": ["2024-10", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "counts": [2, 2, 3, 4, 6, 3, 6, 3, 2, 12, 3, 4], "avg_views": [420202, 396345, 271335, 224428, 605312, 229458, 215792, 593117, 884594, 483344, 307467, 545738]}, "viral_videos": [{"title": "【健康】不吃藥狂降壞膽固醇！名醫曝5大天然食物清血管：三酸肝油酯從600→145！ft.劉博仁醫師｜下班經濟學359", "views": "3.9M", "channel": "風傳媒 The Storm Media", "url": "https://www.youtube.com/watch?v=jJnekeWymgg", "z_score": 15.36}, {"title": "保護眼睛吃什麼？眼科醫師：第一名好食物是...︱鐘珮禎醫師【早安健康】", "views": "3.2M", "channel": "早安健康", "url": "https://www.youtube.com/watch?v=sJh8x6_pLtE", "z_score": 12.63}, {"title": "逆轉腎臟病只要持續2習慣？！專科醫師：三個月即明顯見效", "views": "2.4M", "channel": "風傳媒 The Storm Media", "url": "https://www.youtube.com/watch?v=Zm_9xheHZKg", "z_score": 9.28}, {"title": "生姜放进锅里煮，可以调理全身多种疼痛 #中医 #中医养生 #生姜 #疼痛 #枸杞", "views": "1.6M", "channel": "养生老郑", "url": "https://www.youtube.com/watch?v=hWEUjh-73N8", "z_score": 6.21}, {"title": "治便祕！中醫師教你按這穴位助快速排便 健康2.0", "views": "1.6M", "channel": "健康2.0", "url": "https://www.youtube.com/watch?v=aoDy9OV9QWM", "z_score": 6.14}, {"title": "脊椎肩頸僵硬不可不知的保健方法 - 脊椎保健操 ｜謝教授談脊椎", "views": "1.6M", "channel": "謝教授 談脊椎", "url": "https://www.youtube.com/watch?v=L4yOGKbAOKw", "z_score": 5.95}, {"title": "中医教你养生舒肝解郁操#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM #中医学 #养生 #甲亢哥 #暗黑养生 #祖传秘方 #医学奇迹 #2025养生革命#自然疗法", "views": "1.5M", "channel": "Laxne", "url": "https://www.youtube.com/watch?v=amXv4nPkagI", "z_score": 5.61}, {"title": "每天20下讓你強心臟！ 75歲婦人爬梯不再喘！【聚焦2.0】第432集", "views": "1.3M", "channel": "聚焦2.0", "url": "https://www.youtube.com/watch?v=v4lAuh4V7bk", "z_score": 5.04}, {"title": "早晚四个动作疏通全身#中医药文化 #中医养生 #中药材 #中医传承 #中医 #养生知识 #中药 #TCM #中医学 #养生 #甲亢哥 #暗黑养生 #祖传秘方 #医学奇迹 #2025养生革命 #自然疗法", "views": "1.3M", "channel": "Laxne", "url": "https://www.youtube.com/watch?v=xNREi02Yf_c", "z_score": 4.83}, {"title": "#健康科普 #抖出健康知识宝藏 #科普 #医学科普 #昆明", "views": "1.2M", "channel": "Zen Tao Health", "url": "https://www.youtube.com/watch?v=aMw6KqI5sSI", "z_score": 4.7}], "view_distribution": {"percentiles": {"25": 149.0, "50": 2327.5, "75": 17247.75, "90": 122044.4, "95": 303647.04999999935, "99": 1183385.4099999967}, "mean": 64024, "median": 2327.5}, "content_patterns": {"labels": ["cognitive_impact", "storytelling", "knowledge_sharing", "interaction_guide", "unknown"], "counts": [43, 80, 408, 20, 469], "avg_views": [19045, 86758, 48239, 437273, 62084]}};
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        // 颜色
+        const COLORS = [
+            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+            '#FF9F40', '#7CFC00', '#00CED1', '#FF69B4', '#8A2BE2'
+        ];
+
+        // 更新统计卡片
+        function updateCards() {
+            const cards = DATA.cards;
+            document.getElementById('card-videos').textContent = formatNumber(cards.total_videos);
+            document.getElementById('card-views').textContent = formatNumber(cards.total_views);
+            document.getElementById('card-avg').textContent = formatNumber(cards.avg_views);
+            document.getElementById('card-median').textContent = formatNumber(cards.median_views);
+            document.getElementById('card-channels').textContent = formatNumber(cards.total_channels);
+            document.getElementById('card-details').textContent = formatNumber(cards.with_details);
+        }
+
+        // 关键词饼图
+        function renderKeywordChart() {
+            if (!DATA.keywords) return;
+            new Chart(document.getElementById('keywordChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: DATA.keywords.labels,
+                    datasets: [{
+                        data: DATA.keywords.values,
+                        backgroundColor: COLORS,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+
+        // 内容聚类饼图
+        function renderClusterChart() {
+            if (!DATA.clusters) return;
+            new Chart(document.getElementById('clusterChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: DATA.clusters.labels,
+                    datasets: [{
+                        data: DATA.clusters.counts,
+                        backgroundColor: COLORS,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+
+        // 时长条形图
+        function renderDurationChart() {
+            if (!DATA.duration) return;
+            new Chart(document.getElementById('durationChart'), {
+                type: 'bar',
+                data: {
+                    labels: DATA.duration.labels,
+                    datasets: [{
+                        label: '视频数量',
+                        data: DATA.duration.counts,
+                        backgroundColor: '#36A2EB',
+                        yAxisID: 'y',
+                    }, {
+                        label: '平均播放量',
+                        data: DATA.duration.avg_views,
+                        backgroundColor: '#FF6384',
+                        yAxisID: 'y1',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left', title: { display: true, text: '视频数量' }},
+                        y1: { position: 'right', title: { display: true, text: '平均播放量' }, grid: { drawOnChartArea: false }}
+                    }
+                }
+            });
+        }
+
+        // 标题模式雷达图
+        function renderPatternChart() {
+            if (!DATA.title_patterns) return;
+            new Chart(document.getElementById('patternChart'), {
+                type: 'radar',
+                data: {
+                    labels: DATA.title_patterns.labels,
+                    datasets: [{
+                        label: '使用次数',
+                        data: DATA.title_patterns.values,
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            });
+        }
+
+        // 频道条形图
+        function renderChannelChart() {
+            if (!DATA.channels) return;
+            new Chart(document.getElementById('channelChart'), {
+                type: 'bar',
+                data: {
+                    labels: DATA.channels.labels,
+                    datasets: [{
+                        label: '总播放量',
+                        data: DATA.channels.total_views,
+                        backgroundColor: '#4BC0C0',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // 趋势折线图
+        function renderTrendChart() {
+            if (!DATA.trends) return;
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: DATA.trends.labels,
+                    datasets: [{
+                        label: '视频数量',
+                        data: DATA.trends.counts,
+                        borderColor: '#36A2EB',
+                        yAxisID: 'y',
+                    }, {
+                        label: '平均播放量',
+                        data: DATA.trends.avg_views,
+                        borderColor: '#FF6384',
+                        yAxisID: 'y1',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left' },
+                        y1: { position: 'right', grid: { drawOnChartArea: false }}
+                    }
+                }
+            });
+        }
+
+        // 词云
+        function renderWordCloud() {
+            if (!DATA.top_words) return;
+            const container = document.getElementById('wordCloud');
+            const words = Object.entries(DATA.top_words).slice(0, 20);
+            const maxCount = Math.max(...words.map(w => w[1]));
+
+            words.forEach(([word, count]) => {
+                const span = document.createElement('span');
+                span.textContent = word;
+                const size = 0.8 + (count / maxCount) * 0.6;
+                span.style.fontSize = size + 'rem';
+                container.appendChild(span);
+            });
+        }
+
+        // 爆款视频表格
+        function renderViralTable() {
+            if (!DATA.viral_videos) return;
+            const tbody = document.querySelector('#viralTable tbody');
+            DATA.viral_videos.forEach((video, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td>${video.title.substring(0, 40)}...</td>
+                    <td>${video.views}</td>
+                    <td>${video.channel || '-'}</td>
+                    <td>${video.z_score}</td>
+                    <td><a href="${video.url}" target="_blank">查看</a></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCards();
+            renderKeywordChart();
+            renderClusterChart();
+            renderDurationChart();
+            renderPatternChart();
+            renderChannelChart();
+            renderTrendChart();
+            renderWordCloud();
+            renderViralTable();
+        });
+    </script>
+</body>
+</html>
