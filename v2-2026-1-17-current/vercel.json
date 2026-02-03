@@ -23,6 +23,10 @@
       "dest": "/api/index.py"
     },
     {
+      "src": "/demo.html",
+      "dest": "/web/legacy/demo.html"
+    },
+    {
       "src": "/dashboard/(.*)",
       "dest": "/web/$1"
     },
