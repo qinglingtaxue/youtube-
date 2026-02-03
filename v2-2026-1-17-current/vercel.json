@@ -32,10 +32,14 @@
     },
     {
       "src": "/dashboard",
-      "dest": "/web/legacy/demo.html"
+      "dest": "/web/insight-system.html"
     },
     {
       "src": "^/$",
+      "dest": "/web/insight-system.html"
+    },
+    {
+      "src": "/demo.html",
       "dest": "/web/legacy/demo.html"
     }
   ],
