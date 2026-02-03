@@ -1,0 +1,1 @@
+/Users/su/Downloads/3d_games/3-3d-canvas-upgrade-series/3d-canvas-upgrade-122201/.42plugin/42edu/pm-user-story/SKILL.md

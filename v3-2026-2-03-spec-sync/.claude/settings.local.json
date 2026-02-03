@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "timestamp": "2026-02-03T19:39:00Z",
+  "timestamp": "2026-02-03T19:45:00Z",
   "description": "Claude Code 本地项目配置 - YouTube 最小化视频故事创建工具 v3",
 
   "project": {
@@ -16,7 +16,8 @@
     "enabled": true,
     "autoLoad": true,
     "directory": ".claude/skills",
-    "description": "注册的 Claude Skills - 从 .42cog/skills 软连接",
+    "description": "注册的 Claude Skills - 从 .42cog/skills 和 .42plugin 软连接",
+    "totalSkills": 11,
 
     "skills": [
       {
@@ -24,11 +25,143 @@
         "name": "命名规约检查工具",
         "description": "检查项目中的文件命名冲突和违反规约的文件",
         "type": "audit",
+        "category": "internal",
         "path": ".claude/skills/check-naming-violations.skill.md",
+        "source": ".42cog/skills",
         "enabled": true,
         "trigger": "manual",
         "version": "1.0.0",
         "created": "2026-02-03"
+      },
+      {
+        "id": "user-story",
+        "name": "用户故事技能",
+        "description": "将产品需求拆解为可执行的用户故事。基于人类永恒的三个最小故事来组织和评判故事质量",
+        "type": "generator",
+        "category": "pm",
+        "path": ".claude/skills/pm-user-story-SKILL.zh.md",
+        "source": ".42plugin/42edu/pm-user-story",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "product-requirements",
+        "name": "产品需求技能",
+        "description": "基于可供性理论编写产品需求文档(PRD)。定义环境可供性、识别行动可能性、指定交互设计",
+        "type": "generator",
+        "category": "pm",
+        "path": ".claude/skills/pm-product-requirements-SKILL.zh.md",
+        "source": ".42plugin/42edu/pm-product-requirements",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "ui-design",
+        "name": "UI 设计技能",
+        "description": "UI/UX 设计的规范、检查清单和最佳实践，帮助避免常见的设计陷阱",
+        "type": "guide",
+        "category": "design",
+        "path": ".claude/skills/design-ui-design-SKILL.zh.md",
+        "source": ".42plugin/42edu/design-ui-design",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "vercel-deployment",
+        "name": "Vercel 部署技能",
+        "description": "Vercel 平台部署和配置的完整指南，包括环境变量、域名、CI/CD 配置",
+        "type": "guide",
+        "category": "devops",
+        "path": ".claude/skills/dev-vercel-deployment-SKILL.zh.md",
+        "source": ".42plugin/42edu/dev-vercel-deployment",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "user-story-lite",
+        "name": "用户故事技能(精简版)",
+        "description": "用户故事编写的精简版本，快速生成用户故事",
+        "type": "generator",
+        "category": "pm",
+        "path": ".claude/skills/pm-user-story-SKILL-lite.zh.md",
+        "source": ".42plugin/42edu/pm-user-story",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "product-requirements-lite",
+        "name": "产品需求技能(精简版)",
+        "description": "产品需求文档编写的精简版本，快速生成PRD",
+        "type": "generator",
+        "category": "pm",
+        "path": ".claude/skills/pm-product-requirements-SKILL-lite.zh.md",
+        "source": ".42plugin/42edu/pm-product-requirements",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "product-requirements-en",
+        "name": "产品需求技能(英文版)",
+        "description": "Product requirements document writing in English",
+        "type": "generator",
+        "category": "pm",
+        "path": ".claude/skills/pm-product-requirements-SKILL.md",
+        "source": ".42plugin/42edu/pm-product-requirements",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "user-story-en",
+        "name": "用户故事技能(英文版)",
+        "description": "User story writing in English based on three minimal stories",
+        "type": "generator",
+        "category": "pm",
+        "path": ".claude/skills/pm-user-story-SKILL.md",
+        "source": ".42plugin/42edu/pm-user-story",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "skill-tradition-reference",
+        "name": "Skill 传统方法参考",
+        "description": "Skill 编写的传统方法和最佳实践参考",
+        "type": "reference",
+        "category": "meta",
+        "path": ".claude/skills/references-SKILL-traditional.md",
+        "source": ".42plugin/42edu/pm-product-requirements/references",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
+      },
+      {
+        "id": "skill-tradition-reference-zh",
+        "name": "Skill 传统方法参考(中文)",
+        "description": "Skill 编写的传统方法和最佳实践参考(中文版)",
+        "type": "reference",
+        "category": "meta",
+        "path": ".claude/skills/references-SKILL-traditional.zh.md",
+        "source": ".42plugin/42edu/pm-product-requirements/references",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-02"
       }
     ]
   },
@@ -105,6 +238,6 @@
     "maintainer": "Claude Code",
     "license": "MIT",
     "repository": "cnb.cool",
-    "lastUpdated": "2026-02-03T19:39:00Z"
+    "lastUpdated": "2026-02-03T19:45:00Z"
   }
 }
