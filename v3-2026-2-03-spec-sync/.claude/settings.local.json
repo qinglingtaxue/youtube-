@@ -1,0 +1,110 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-02-03T19:39:00Z",
+  "description": "Claude Code 本地项目配置 - YouTube 最小化视频故事创建工具 v3",
+
+  "project": {
+    "name": "youtube-minimal-video-story-v3",
+    "displayName": "YouTube 最小化视频故事创建工具 (v3) - 规范同步版",
+    "description": "内容创建工具，专注于视频故事规范同步",
+    "rootPath": "/Users/su/Downloads/3d_games/5-content-creation-tools/youtube-minimal-video-story/v3-2026-2-03-spec-sync",
+    "version": "3.0.0",
+    "created": "2026-02-03"
+  },
+
+  "skills": {
+    "enabled": true,
+    "autoLoad": true,
+    "directory": ".claude/skills",
+    "description": "注册的 Claude Skills - 从 .42cog/skills 软连接",
+
+    "skills": [
+      {
+        "id": "check-naming-violations",
+        "name": "命名规约检查工具",
+        "description": "检查项目中的文件命名冲突和违反规约的文件",
+        "type": "audit",
+        "path": ".claude/skills/check-naming-violations.skill.md",
+        "enabled": true,
+        "trigger": "manual",
+        "version": "1.0.0",
+        "created": "2026-02-03"
+      }
+    ]
+  },
+
+  "ignorePatterns": {
+    "enabled": true,
+    "gitignore": ".gitignore",
+    "claudeignore": ".claudeignore",
+    "description": "文件忽略规则配置"
+  },
+
+  "environment": {
+    "os": "macOS",
+    "arch": "arm64",
+    "nodeManager": "bun",
+    "pythonManager": "uv",
+    "gitPlatform": "cnb.cool",
+    "language": "zh-CN"
+  },
+
+  "toolchain": {
+    "node": {
+      "manager": "bun",
+      "commands": {
+        "install": "bun install",
+        "run": "bun run",
+        "test": "bun test",
+        "build": "bun run build"
+      }
+    },
+    "python": {
+      "manager": "uv",
+      "commands": {
+        "createEnv": "uv venv",
+        "install": "uv pip install",
+        "sync": "uv sync"
+      }
+    },
+    "git": {
+      "platform": "cnb.cool",
+      "branch": "master",
+      "pushCommand": "git push origin master",
+      "pullCommand": "git pull origin master"
+    }
+  },
+
+  "communication": {
+    "language": "zh-CN",
+    "timezone": "UTC+8",
+    "dateFormat": "YYYY-MM-DD",
+    "preferredFormat": "markdown"
+  },
+
+  "features": {
+    "contextAwareness": true,
+    "codeAnalysis": true,
+    "skillExecution": true,
+    "documentGeneration": true,
+    "gitIntegration": true
+  },
+
+  "paths": {
+    "source": "src",
+    "public": "public",
+    "tests": "tests",
+    "docs": "docs",
+    "scripts": "scripts",
+    "config": ".42cog",
+    "skills": ".claude/skills"
+  },
+
+  "metadata": {
+    "author": "Project Setup",
+    "maintainer": "Claude Code",
+    "license": "MIT",
+    "repository": "cnb.cool",
+    "lastUpdated": "2026-02-03T19:39:00Z"
+  }
+}

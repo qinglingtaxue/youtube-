@@ -1,0 +1,1 @@
+/Users/su/Downloads/3d_games/5-content-creation-tools/youtube-minimal-video-story/v3-2026-2-03-spec-sync/.42cog/skills/check-naming-violations.skill.md
