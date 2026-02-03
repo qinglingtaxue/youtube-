@@ -23,24 +23,24 @@
       "dest": "/api/index.py"
     },
     {
-      "src": "/demo.html",
-      "dest": "/web/legacy/demo.html"
-    },
-    {
-      "src": "/dashboard/(.*)",
-      "dest": "/web/$1"
+      "src": "^/$",
+      "dest": "/web/insight-system.html"
     },
     {
       "src": "/dashboard",
       "dest": "/web/insight-system.html"
     },
     {
-      "src": "^/$",
-      "dest": "/web/insight-system.html"
+      "src": "/dashboard/(.*)",
+      "dest": "/web/$1"
     },
     {
       "src": "/demo.html",
       "dest": "/web/legacy/demo.html"
+    },
+    {
+      "src": "/(.*\\.html)$",
+      "dest": "/web/$1"
     }
   ],
   "regions": ["sin1"]
