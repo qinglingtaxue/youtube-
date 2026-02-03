@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "250mb"
+      }
+    },
+    {
+      "src": "demo.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "web/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/dashboard/(.*)",
+      "dest": "/web/$1"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/web/insight-system.html"
+    },
+    {
+      "src": "^/$",
+      "dest": "/web/insight-system.html"
+    }
+  ],
+  "regions": ["sin1"]
+}
