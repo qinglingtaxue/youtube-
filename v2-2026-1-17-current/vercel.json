@@ -9,7 +9,7 @@
       }
     },
     {
-      "src": "demo.html",
+      "src": "web/legacy/demo.html",
       "use": "@vercel/static"
     },
     {
