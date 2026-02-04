@@ -33,24 +33,6 @@ export function Navbar() {
             >
               首页
             </Link>
-            <Link
-              href="/videos"
-              className="text-gray-600 dark:text-gray-400 hover:text-primary transition"
-            >
-              视频
-            </Link>
-            <Link
-              href="/channels"
-              className="text-gray-600 dark:text-gray-400 hover:text-primary transition"
-            >
-              频道
-            </Link>
-            <Link
-              href="/trends"
-              className="text-gray-600 dark:text-gray-400 hover:text-primary transition"
-            >
-              趋势
-            </Link>
           </div>
 
           {/* 右侧按钮 */}
@@ -82,27 +64,6 @@ export function Navbar() {
               onClick={() => setIsOpen(false)}
             >
               首页
-            </Link>
-            <Link
-              href="/videos"
-              className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition"
-              onClick={() => setIsOpen(false)}
-            >
-              视频
-            </Link>
-            <Link
-              href="/channels"
-              className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition"
-              onClick={() => setIsOpen(false)}
-            >
-              频道
-            </Link>
-            <Link
-              href="/trends"
-              className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition"
-              onClick={() => setIsOpen(false)}
-            >
-              趋势
             </Link>
           </div>
         )}

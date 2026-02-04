@@ -6,12 +6,12 @@ const config: Config = {
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './lib/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  safelist: {
-    patterns: [
-      { pattern: /.*/ }, // Allow all classes (production should not do this)
-    ],
-  },
+  safelist: [
+    // Safelist all common utility classes to avoid purging issues
+    { pattern: /.+/ },
+  ],
   theme: {
     extend: {
       colors: {
