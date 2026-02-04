@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
     const generateHeatmapData = () => {
       const rows = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
       const cols = ['上午', '中午', '下午', '晚上']
-      const data = []
+      const data: Array<{ row: string; col: string; value: number }> = []
 
       rows.forEach(row => {
         cols.forEach(col => {
