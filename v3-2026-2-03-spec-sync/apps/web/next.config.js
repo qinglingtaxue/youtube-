@@ -62,6 +62,9 @@ const nextConfig = {
       },
     }
 
+    // 禁用 Turbopack
+    config.turbopack = {}
+
     return config
   },
 }
