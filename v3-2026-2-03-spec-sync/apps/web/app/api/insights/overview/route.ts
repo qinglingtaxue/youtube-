@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
     ]
 
     // Mock 四象限散点（时长 vs 完成率）
-    const quadrantData = Array.from({ length: 120 }, (_, i) => ({
+    const quadrantData = Array.from({ length: 120 }, (_) => ({
       duration: Math.floor(Math.random() * 60) + 2,
       completionRate: Math.floor(Math.random() * 100) + 30,
       views: Math.floor(Math.random() * 500000) + 10000,
