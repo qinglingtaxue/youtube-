@@ -7,9 +7,11 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  safelist: [
-    // Ensure dynamic Tailwind classes are not purged
-  ],
+  safelist: {
+    patterns: [
+      { pattern: /.*/ }, // Allow all classes (production should not do this)
+    ],
+  },
   theme: {
     extend: {
       colors: {
