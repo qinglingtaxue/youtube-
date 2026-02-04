@@ -5,6 +5,7 @@ import { ChevronLeft, Share2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { LineChart, BarChart, InsightCard, InsightCards } from '@/components/insights'
+import { useParams } from 'next/navigation'
 
 interface ChannelDetail {
   id: string
@@ -26,22 +27,22 @@ interface MonthlyData {
   value: number
 }
 
-export default function ChannelDetailPage({ params }: { params: { id: string } }) {
+export default function ChannelDetailPage() {
+  const params = useParams()
+  const id = params?.id as string
+
   const [channel, setChannel] = useState<ChannelDetail | null>(null)
   const [monthlyGrowth, setMonthlyGrowth] = useState<MonthlyData[]>([])
   const [topVideos, setTopVideos] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchChannelDetail()
-  }, [params.id])
+    if (!id) return
 
-  const fetchChannelDetail = async () => {
-    setLoading(true)
     try {
       // Mock 频道详情数据
       const mockChannel: ChannelDetail = {
-        id: params.id,
+        id: id,
         name: '@科技教学频道',
         subscribers: 450000,
         totalViews: 125000000,
@@ -85,7 +86,7 @@ export default function ChannelDetailPage({ params }: { params: { id: string } }
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   if (loading) {
     return <div className="text-center py-12">加载中...</div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChevronLeft, Share2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { LineChart, BarChart, InsightCard, InsightCards, NetworkGraph, WordCloud } from '@/components/insights'
 
 interface VideoDetail {
@@ -25,7 +26,10 @@ interface GrowthData {
   value: number
 }
 
-export default function VideoDetailPage({ params }: { params: { id: string } }) {
+export default function VideoDetailPage() {
+  const params = useParams()
+  const id = params?.id as string
+
   const [video, setVideo] = useState<VideoDetail | null>(null)
   const [growthData, setGrowthData] = useState<GrowthData[]>([])
   const [relatedVideos, setRelatedVideos] = useState<any[]>([])
@@ -35,15 +39,12 @@ export default function VideoDetailPage({ params }: { params: { id: string } }) 
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchVideoDetail()
-  }, [params.id])
+    if (!id) return
 
-  const fetchVideoDetail = async () => {
-    setLoading(true)
     try {
       // Mock 详情数据
       const mockVideo: VideoDetail = {
-        id: params.id,
+        id: id,
         title: '5 分钟学会 AI 视频生成 - 完整教程',
         channelName: '科技教学频道',
         publishedAt: '2024-02-01',
@@ -123,7 +124,7 @@ export default function VideoDetailPage({ params }: { params: { id: string } }) 
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   if (loading) {
     return <div className="text-center py-12">加载中...</div>
