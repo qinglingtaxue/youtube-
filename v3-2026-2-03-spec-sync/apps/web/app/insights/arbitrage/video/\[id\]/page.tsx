@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChevronLeft, Share2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { LineChart, BarChart, InsightCard, InsightCards } from '@/components/insights'
+import { LineChart, BarChart, InsightCard, InsightCards, NetworkGraph, WordCloud } from '@/components/insights'
 
 interface VideoDetail {
   id: string
@@ -29,6 +29,9 @@ export default function VideoDetailPage({ params }: { params: { id: string } }) 
   const [video, setVideo] = useState<VideoDetail | null>(null)
   const [growthData, setGrowthData] = useState<GrowthData[]>([])
   const [relatedVideos, setRelatedVideos] = useState<any[]>([])
+  const [networkNodes, setNetworkNodes] = useState<any[]>([])
+  const [networkEdges, setNetworkEdges] = useState<any[]>([])
+  const [keywords, setKeywords] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -76,6 +79,45 @@ export default function VideoDetailPage({ params }: { params: { id: string } }) 
           interestingness: Math.random() * 1,
         }))
       )
+
+      // Mock 网络图数据
+      const mockNodes = [
+        { id: 'video-main', label: '当前视频', type: 'video', value: 250 },
+        { id: 'channel-1', label: '科技频道', type: 'channel', value: 150 },
+        { id: 'keyword-ai', label: 'AI技术', type: 'keyword', value: 200 },
+        { id: 'keyword-tutorial', label: '教程', type: 'keyword', value: 180 },
+        { id: 'video-related-1', label: '相关视频1', type: 'video', value: 120 },
+        { id: 'video-related-2', label: '相关视频2', type: 'video', value: 110 },
+      ]
+
+      const mockEdges = [
+        { source: 'video-main', target: 'channel-1', weight: 5 },
+        { source: 'video-main', target: 'keyword-ai', weight: 4 },
+        { source: 'video-main', target: 'keyword-tutorial', weight: 3 },
+        { source: 'video-main', target: 'video-related-1', weight: 2 },
+        { source: 'video-main', target: 'video-related-2', weight: 2 },
+        { source: 'keyword-ai', target: 'video-related-1', weight: 2 },
+        { source: 'keyword-tutorial', target: 'video-related-2', weight: 2 },
+      ]
+
+      setNetworkNodes(mockNodes)
+      setNetworkEdges(mockEdges)
+
+      // Mock 关键词数据
+      const mockKeywords = [
+        { text: 'AI生成', value: 350 },
+        { text: '视频教程', value: 280 },
+        { text: '深度学习', value: 220 },
+        { text: '自动化', value: 190 },
+        { text: '技术分享', value: 170 },
+        { text: '创意工具', value: 150 },
+        { text: '实战演示', value: 140 },
+        { text: '初学者', value: 130 },
+        { text: '完整指南', value: 120 },
+        { text: '最佳实践', value: 110 },
+      ]
+
+      setKeywords(mockKeywords)
     } catch (error) {
       console.error('Failed to fetch video detail:', error)
     } finally {
@@ -248,6 +290,31 @@ export default function VideoDetailPage({ params }: { params: { id: string } }) 
             ))}
           </div>
         </div>
+
+        {/* 关系网络图 */}
+        {networkNodes.length > 0 && (
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6">
+            <NetworkGraph
+              nodes={networkNodes}
+              edges={networkEdges}
+              title="🌐 关系网络"
+              width={800}
+              height={500}
+            />
+          </div>
+        )}
+
+        {/* 关键词词云 */}
+        {keywords.length > 0 && (
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6">
+            <WordCloud
+              words={keywords}
+              title="☁️ 关键词分布"
+              width={800}
+              height={300}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
