@@ -483,15 +483,41 @@ export interface TaskState {
 /**
  * 内容四象限 (ContentQuadrant)
  * 播放量×互动率的二维分类
+ *
+ * 说明：
+ * - 不再在此表中存储 video_ids 数组（会导致 1MB+ 单条记录）
+ * - 改用关联表 content_quadrant_membership 支持分页查询
+ * - 使用 QuadrantOperations.getQuadrantVideos(quadrantId, {page, limit}) 分页获取视频
+ *
+ * 参考：src/db/migrations/002_fix_quadrant_structure.sql
+ * 参考：src/db/quadrant-operations.ts
  */
 export interface ContentQuadrant {
   id: string; // UUID
   quadrant_type: QuadrantType;
   views_threshold: number;
   engagement_threshold: number;
-  video_ids?: string[]; // Foreign Keys to CompetitorVideo
-  count?: number;
-  percentage?: number;
+  // ❌ 已删除：video_ids?: string[];
+  // ✅ 改用关联表 content_quadrant_membership（见迁移脚本）
+  count?: number; // 该象限的视频总数（从关联表统计）
+  percentage?: number; // 占比
+}
+
+/**
+ * 内容四象限成员关联表 (ContentQuadrantMembership)
+ * 用于存储象限与视频的多对多关系
+ *
+ * 替代 ContentQuadrant.video_ids 数组字段
+ * 支持高效分页查询和灵活的成员管理
+ */
+export interface ContentQuadrantMembership {
+  id: string; // UUID
+  quadrant_id: string; // Foreign Key to ContentQuadrant
+  video_id: string; // Foreign Key to CompetitorVideo
+  created_at: Date;
+
+  // 计算属性（可选）
+  rank?: number; // 在象限中的排序位置（按播放量）
 }
 
 /**
@@ -794,6 +820,109 @@ export interface ReasoningStep {
 }
 
 /**
+ * 信息报告 (InformationReport)
+ * 推理链式分析报告，汇总跨页数据的分析结论，指导用户决策
+ *
+ * 结构：
+ * 1. 研究假设（来自全局筛选器）
+ * 2. 结论链（4 张结论卡片）
+ * 3. 综合结论（4 个关键点）
+ * 4. 行动入口（导出 + 创作者行动中心）
+ *
+ * 参考：cog-process.md L536-720
+ */
+export interface InformationReport {
+  id: string; // singleton UUID
+  generated_at: Date;
+  keyword: string; // 关键词（用于唯一标识）
+  time_range: string; // "过去 3 个月"、"过去 7 天" 等
+
+  // 四层结构
+  hypothesis: ResearchHypothesis;
+  conclusions: ConclusionCard[]; // 4 张卡片
+  synthesized_conclusion: SynthesizedConclusion;
+  action_gateway: ActionGateway;
+
+  // 元数据
+  sample_size: number; // 分析样本量（视频数）
+  data_sources: string[]; // ["YouTube", "Google Trends"] 等
+  confidence: number; // 整体置信度（0-100%）
+}
+
+/**
+ * 研究假设
+ * 来源：全局状态（用户在顶部全局筛选器改变时自动同步）
+ */
+export interface ResearchHypothesis {
+  question: string; // 研究问题描述（1-2 句）
+  keyword: string; // "养生"
+  time_range: string; // "过去 3 个月"
+  data_sources: string[]; // ["YouTube", "Google Trends"]
+}
+
+/**
+ * 结论卡片
+ * 每条报告包含 4 张卡片，对应：
+ * ① 市场竞争分析
+ * ② 内容缺口发现
+ * ③ 最优时长分析
+ * ④ 跨语言机会
+ */
+export interface ConclusionCard {
+  id: string; // "1" | "2" | "3" | "4"
+  title: string; // "市场竞争分散，新人有机会进入"（50 字以内）
+  summary: string; // 一句话摘要（100 字以内）
+  confidence: number; // 置信度 (75-88%)
+  tags: string[]; // 数据源标签 + 模式标签
+  reasoning_steps: ReasoningStep[]; // 推理步骤列表
+  embedded_charts?: {
+    chart_type: string; // "bar" | "line" | "scatter" | "network" 等
+    chart_name: string; // "频道集中度" | "时长分布" 等
+    data_source: string; // 页面和 Tab 来源
+  }[];
+  is_expanded: boolean; // 初始：①=true, ②③④=false
+}
+
+/**
+ * 综合结论
+ */
+export interface SynthesizedConclusion {
+  main_text: string; // 综合结论主文案（1-2 句）
+  // 例：「养生」赛道新创作者的首选策略：切入内容缺口话题，
+  //   采用 4-20 分钟中视频格式，快速测试市场反应。
+
+  key_points: string[]; // 关键点列表（4 项，对应 ①②③④）
+  // 例：[
+  //   "市场竞争分散（Top 10 占 23%），新人有生存空间",
+  //   "「穴位按摩」等话题有明确的内容缺口和需求",
+  //   "中视频 (4-20min) 平均播放量最高（8.2 万）",
+  //   "Tai Chi 等英文热词可通过翻译内容快速变现"
+  // ]
+}
+
+/**
+ * 行动入口
+ */
+export interface ActionGateway {
+  export_enabled: boolean; // 是否可导出
+  export_format?: "markdown" | "pdf"; // 导出格式（默认 markdown）
+  action_center_link?: string; // 创作者行动中心链接
+  // 例："/creator-action-center.html?keyword=养生"
+}
+
+/**
+ * 数据源标签
+ * 用于追踪结论的数据来源
+ */
+export interface DataSourceTag {
+  icon: string; // "📊" | "📈" | "🔍" 等
+  source_page: string; // "全局认识" | "套利分析" | "Google Trends"
+  source_tab?: string; // "市场规模" | "有趣度排名"
+  source_chart?: string; // "频道集中度图" | "视频有趣度榜"
+  color?: string; // "blue" | "green" | "orange" 等
+}
+
+/**
  * 监控任务 (MonitorTask)
  * 定时数据采集任务
  */
@@ -912,6 +1041,7 @@ export type {
   Task,
   TaskState,
   ContentQuadrant,
+  ContentQuadrantMembership,
   DurationMatrix,
   KeywordNetwork,
   KeywordNode,
@@ -932,6 +1062,12 @@ export type {
   InsightCard,
   ReasoningChain,
   ReasoningStep,
+  InformationReport,
+  ResearchHypothesis,
+  ConclusionCard,
+  SynthesizedConclusion,
+  ActionGateway,
+  DataSourceTag,
   MonitorTask,
   TrendingTracker,
   SearchPanel,

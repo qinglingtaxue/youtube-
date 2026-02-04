@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局认识 - 信息分布可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="chart-styles.css">
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>全局认识</h1>
+            <div class="meta">建立对数据信息分布的直观理解</div>
+        </div>
+    </div>
+
+    <!-- 子标签导航 -->
+    <div class="tabs">
+        <div class="tab active" onclick="showSubTab('market-size')">📊 市场规模</div>
+        <div class="tab" onclick="showSubTab('content-dist')">📝 内容分布</div>
+        <div class="tab" onclick="showSubTab('channel-landscape')">👥 频道格局</div>
+        <div class="tab" onclick="showSubTab('time-dist')">📅 时间分布</div>
+    </div>
+
+    <div class="content">
+        <!-- ========================================
+             子标签 1: 市场规模 - 回答"有多大"
+             ======================================== -->
+        <div id="market-size" class="tab-content active">
+            <!-- 核心数字卡片 -->
+            <div class="cards">
+                <div class="card highlight">
+                    <div class="card-label">视频总数</div>
+                    <div class="card-value" id="stat-total-videos">-</div>
+                    <div class="card-sub">样本覆盖范围</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">频道数</div>
+                    <div class="card-value" id="stat-total-channels">-</div>
+                    <div class="card-sub">参与竞争的频道</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">总播放量</div>
+                    <div class="card-value" id="stat-total-views">-</div>
+                    <div class="card-sub">累计播放</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">平均播放量</div>
+                    <div class="card-value" id="stat-avg-views">-</div>
+                    <div class="card-sub" id="stat-median-views">中位数: -</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- 播放量分布直方图 -->
+                <div class="chart-container">
+                    <div class="chart-title">📊 播放量分布（长尾分布）</div>
+                    <div class="chart-wrapper">
+                        <canvas id="viewDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 视频数量时间趋势 -->
+                <div class="chart-container">
+                    <div class="chart-title">📈 视频数量趋势（按月）</div>
+                    <div class="chart-wrapper">
+                        <canvas id="videoTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             子标签 2: 内容分布 - 回答"什么样"
+             ======================================== -->
+        <div id="content-dist" class="tab-content">
+            <div class="grid-2">
+                <!-- 时长分布条形图 -->
+                <div class="chart-container">
+                    <div class="chart-title">⏱️ 时长分布（YouTube 原生分档）</div>
+                    <div class="chart-wrapper">
+                        <canvas id="durationDistChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 播放量分层饼图 -->
+                <div class="chart-container">
+                    <div class="chart-title">🎯 播放量分层</div>
+                    <div class="chart-wrapper">
+                        <canvas id="viewTiersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 四象限散点图 -->
+            <div class="chart-container">
+                <div class="chart-title">📈 播放量 × 点赞率 四象限图</div>
+                <div class="chart-wrapper" style="height: 400px;">
+                    <canvas id="quadrantChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             子标签 3: 频道格局 - 回答"谁在做"
+             ======================================== -->
+        <div id="channel-landscape" class="tab-content">
+            <!-- 频道概览卡片 -->
+            <div class="cards">
+                <div class="card highlight">
+                    <div class="card-label">总频道数</div>
+                    <div class="card-value" id="stat-channels">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Top10 集中度</div>
+                    <div class="card-value" id="stat-top10-share">-</div>
+                    <div class="card-sub">头部10个频道占总播放量</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Top20 集中度</div>
+                    <div class="card-value" id="stat-top20-share">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">单视频频道</div>
+                    <div class="card-value" id="stat-single-video-channels">-</div>
+                    <div class="card-sub" id="stat-single-video-pct">占比 -</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- 频道规模分布 -->
+                <div class="chart-container">
+                    <div class="chart-title">📊 频道规模分布</div>
+                    <div class="chart-wrapper">
+                        <canvas id="channelSizeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 市场集中度 -->
+                <div class="chart-container">
+                    <div class="chart-title">📈 市场集中度</div>
+                    <div class="chart-wrapper">
+                        <canvas id="concentrationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 头部频道表格 -->
+            <div class="table-container">
+                <div class="chart-title">🏆 头部频道 Top 10</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>频道名称</th>
+                            <th>视频数</th>
+                            <th>总播放</th>
+                            <th>平均播放</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topChannelsBody">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================
+             子标签 4: 时间分布 - 回答"什么时候"
+             ======================================== -->
+        <div id="time-dist" class="tab-content">
+            <!-- 时间概览卡片 -->
+            <div class="cards">
+                <div class="card highlight">
+                    <div class="card-label">数据时间跨度</div>
+                    <div class="card-value" id="stat-date-span">-</div>
+                    <div class="card-sub" id="stat-date-range">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">有日期视频</div>
+                    <div class="card-value" id="stat-videos-with-date">-</div>
+                    <div class="card-sub" id="stat-date-coverage">占比 -</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">7天内</div>
+                    <div class="card-value" id="stat-7d">-</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">30天内</div>
+                    <div class="card-value" id="stat-30d">-</div>
+                </div>
+            </div>
+
+            <!-- 发布日期分布 -->
+            <div class="chart-container">
+                <div class="chart-title">📅 发布时间分布</div>
+                <div class="chart-wrapper">
+                    <canvas id="timeDistChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <!-- 星期分布 -->
+                <div class="chart-container">
+                    <div class="chart-title">📆 星期分布</div>
+                    <div class="chart-wrapper">
+                        <canvas id="weekdayChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 时间窗口对比 -->
+                <div class="chart-container">
+                    <div class="chart-title">⏰ 时间窗口对比</div>
+                    <div class="chart-wrapper">
+                        <canvas id="timeWindowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 示例数据 (实际使用时替换为真实数据)
+        // ============================================
+        const DATA = {
+            // 市场规模
+            total_videos: 1020,
+            total_views: 65304549,
+            avg_views: 64024,
+            median_views: 2330,
+            total_channels: 476,
+
+            // 播放量分布 (直方图数据)
+            view_distribution: {
+                bins: ['<1K', '1K-10K', '10K-100K', '100K-1M', '>1M'],
+                counts: [402, 295, 204, 102, 17]
+            },
+
+            // 视频趋势 (按月)
+            video_trend: {
+                labels: ['2024-07', '2024-08', '2024-09', '2024-10', '2024-11', '2024-12'],
+                counts: [15, 22, 18, 25, 30, 28]
+            },
+
+            // 时长分布 (YouTube 原生分档)
+            duration_dist: {
+                labels: ['< 4分钟', '4-20分钟', '> 20分钟'],
+                counts: [795, 158, 67]
+            },
+
+            // 播放量分层
+            view_tiers: {
+                labels: ['100万+', '10-100万', '1-10万', '1K-1万', '<1K'],
+                counts: [17, 102, 204, 295, 402]
+            },
+
+            // 频道数据
+            top10_share: 62.6,
+            top20_share: 81.0,
+            channel_size_dist: {
+                labels: ['单视频', '2-4个', '5-9个', '10+个'],
+                counts: [363, 87, 15, 11]
+            },
+            top_channels: [
+                { channel: '赵宇昊教授', video_count: 141, total_views: 9537436, avg_views: 67641 },
+                { channel: '健康2.0', video_count: 17, total_views: 6338660, avg_views: 372862 },
+                { channel: '風傳媒', video_count: 2, total_views: 6336754, avg_views: 3168377 },
+            ],
+
+            // 时间数据
+            date_span: '9年5个月',
+            date_earliest: '2016-07-19',
+            date_latest: '2025-12-23',
+            videos_with_date: 100,
+            date_coverage: 9.8,
+            time_buckets: {
+                labels: ['24h内', '7天内', '30天内', '90天内', '6个月内', '1年内', '1年以上'],
+                values: [0, 0, 1, 14, 27, 48, 52]
+            },
+            weekday_dist: [12, 15, 10, 15, 25, 12, 11]
+        };
+
+        // ============================================
+        // 子标签切换
+        // ============================================
+        function showSubTab(tabId) {
+            // 更新标签状态
+            document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // 初始化对应图表
+            initCharts(tabId);
+        }
+
+        // ============================================
+        // 图表初始化
+        // ============================================
+        const charts = {};
+
+        function initCharts(tabId) {
+            switch(tabId) {
+                case 'market-size':
+                    initMarketSizeCharts();
+                    break;
+                case 'content-dist':
+                    initContentDistCharts();
+                    break;
+                case 'channel-landscape':
+                    initChannelCharts();
+                    break;
+                case 'time-dist':
+                    initTimeCharts();
+                    break;
+            }
+        }
+
+        function initMarketSizeCharts() {
+            // 更新统计卡片
+            document.getElementById('stat-total-videos').textContent = DATA.total_videos.toLocaleString();
+            document.getElementById('stat-total-channels').textContent = DATA.total_channels.toLocaleString();
+            document.getElementById('stat-total-views').textContent = DATA.total_views.toLocaleString();
+            document.getElementById('stat-avg-views').textContent = DATA.avg_views.toLocaleString();
+            document.getElementById('stat-median-views').textContent = `中位数: ${DATA.median_views.toLocaleString()}`;
+
+            // 播放量分布直方图
+            if (!charts.viewDistributionChart) {
+                const ctx = document.getElementById('viewDistributionChart');
+                charts.viewDistributionChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: DATA.view_distribution.bins,
+                        datasets: [{
+                            label: '视频数量',
+                            data: DATA.view_distribution.counts,
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // 视频趋势折线图
+            if (!charts.videoTrendChart) {
+                const ctx = document.getElementById('videoTrendChart');
+                charts.videoTrendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: DATA.video_trend.labels,
+                        datasets: [{
+                            label: '视频数量',
+                            data: DATA.video_trend.counts,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        function initContentDistCharts() {
+            // 时长分布
+            if (!charts.durationDistChart) {
+                const ctx = document.getElementById('durationDistChart');
+                charts.durationDistChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: DATA.duration_dist.labels,
+                        datasets: [{
+                            label: '视频数量',
+                            data: DATA.duration_dist.counts,
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // 播放量分层饼图
+            if (!charts.viewTiersChart) {
+                const ctx = document.getElementById('viewTiersChart');
+                charts.viewTiersChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: DATA.view_tiers.labels,
+                        datasets: [{
+                            data: DATA.view_tiers.counts,
+                            backgroundColor: ['#f5576c', '#f093fb', '#667eea', '#4facfe', '#00f2fe']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right' } }
+                    }
+                });
+            }
+
+            // 四象限散点图 (示例数据)
+            if (!charts.quadrantChart) {
+                const ctx = document.getElementById('quadrantChart');
+                // 生成示例散点数据
+                const scatterData = [];
+                for (let i = 0; i < 50; i++) {
+                    scatterData.push({
+                        x: Math.random() * 1000000,
+                        y: Math.random() * 10
+                    });
+                }
+
+                charts.quadrantChart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: '视频',
+                            data: scatterData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { title: { display: true, text: '播放量' } },
+                            y: { title: { display: true, text: '点赞率 (%)' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initChannelCharts() {
+            // 更新统计卡片
+            document.getElementById('stat-channels').textContent = DATA.total_channels.toLocaleString();
+            document.getElementById('stat-top10-share').textContent = DATA.top10_share + '%';
+            document.getElementById('stat-top20-share').textContent = DATA.top20_share + '%';
+            document.getElementById('stat-single-video-channels').textContent = DATA.channel_size_dist.counts[0].toLocaleString();
+            document.getElementById('stat-single-video-pct').textContent = `占 ${(DATA.channel_size_dist.counts[0] / DATA.total_channels * 100).toFixed(1)}%`;
+
+            // 频道规模分布
+            if (!charts.channelSizeChart) {
+                const ctx = document.getElementById('channelSizeChart');
+                charts.channelSizeChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: DATA.channel_size_dist.labels,
+                        datasets: [{
+                            data: DATA.channel_size_dist.counts,
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right' } }
+                    }
+                });
+            }
+
+            // 市场集中度
+            if (!charts.concentrationChart) {
+                const ctx = document.getElementById('concentrationChart');
+                charts.concentrationChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Top 10', 'Top 20', '其他'],
+                        datasets: [{
+                            label: '播放量占比 (%)',
+                            data: [DATA.top10_share, DATA.top20_share - DATA.top10_share, 100 - DATA.top20_share],
+                            backgroundColor: ['#f5576c', '#f093fb', '#e0e0e0']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // 填充头部频道表格
+            const tbody = document.getElementById('topChannelsBody');
+            tbody.innerHTML = DATA.top_channels.map((ch, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${ch.channel}</td>
+                    <td>${ch.video_count}</td>
+                    <td>${ch.total_views.toLocaleString()}</td>
+                    <td>${ch.avg_views.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function initTimeCharts() {
+            // 更新统计卡片
+            document.getElementById('stat-date-span').textContent = DATA.date_span;
+            document.getElementById('stat-date-range').textContent = `${DATA.date_earliest} ~ ${DATA.date_latest}`;
+            document.getElementById('stat-videos-with-date').textContent = DATA.videos_with_date.toLocaleString();
+            document.getElementById('stat-date-coverage').textContent = `占比 ${DATA.date_coverage}%`;
+            document.getElementById('stat-7d').textContent = DATA.time_buckets.values[1];
+            document.getElementById('stat-30d').textContent = DATA.time_buckets.values[2];
+
+            // 时间分布
+            if (!charts.timeDistChart) {
+                const ctx = document.getElementById('timeDistChart');
+                charts.timeDistChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: DATA.time_buckets.labels,
+                        datasets: [{
+                            label: '视频数量',
+                            data: DATA.time_buckets.values,
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // 星期分布雷达图
+            if (!charts.weekdayChart) {
+                const ctx = document.getElementById('weekdayChart');
+                charts.weekdayChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                        datasets: [{
+                            label: '发布数量',
+                            data: DATA.weekday_dist,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.2)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // 时间窗口对比
+            if (!charts.timeWindowChart) {
+                const ctx = document.getElementById('timeWindowChart');
+                charts.timeWindowChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: DATA.time_buckets.labels,
+                        datasets: [{
+                            label: '视频占比 (%)',
+                            data: DATA.time_buckets.values.map(v => (v / DATA.videos_with_date * 100).toFixed(1)),
+                            backgroundColor: '#764ba2'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
+
+        // 页面加载时初始化第一个标签
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts('market-size');
+        });
+    </script>
+</body>
+</html>

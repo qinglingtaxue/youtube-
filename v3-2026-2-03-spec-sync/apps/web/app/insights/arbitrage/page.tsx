@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface SortConfig {
   timeRange: string
@@ -216,9 +217,11 @@ export default function ArbitrageAnalysisPage() {
                       </td>
                       <td className="text-right py-3 px-4">{(video.views / 10000).toFixed(0)}w</td>
                       <td className="text-right py-3 px-4">
-                        <Button variant="outline" size="sm">
-                          查看
-                        </Button>
+                        <Link href={`/insights/arbitrage/video/${video.id}`}>
+                          <Button variant="outline" size="sm">
+                            查看
+                          </Button>
+                        </Link>
                       </td>
                     </tr>
                   ))}

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>套利分析 - 信息网络可视化</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- vis-network 网络图 -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+
+    <link rel="stylesheet" href="chart-styles.css">
+    <style>
+        /* 页面特定样式 */
+        .metric-explanation {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0 12px 12px 0;
+        }
+        .metric-explanation h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .metric-explanation p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .formula {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            text-align: center;
+            margin: 15px 0;
+            color: #333;
+        }
+        .formula .highlight {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* 三榜单并排布局 */
+        .three-rankings {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        @media (max-width: 1200px) {
+            .three-rankings {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .ranking-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .ranking-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .ranking-card-icon {
+            font-size: 24px;
+        }
+        .ranking-card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .ranking-card-subtitle {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* 网络图控制面板 */
+        .network-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group label {
+            font-size: 13px;
+            color: #666;
+        }
+        .control-group select {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+        }
+
+        /* 节点高亮样式 */
+        .node-highlight-interestingness {
+            box-shadow: 0 0 20px #ffd700;
+        }
+        .node-highlight-betweenness {
+            box-shadow: 0 0 20px #667eea;
+        }
+        .node-highlight-degree {
+            box-shadow: 0 0 20px #f5576c;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>套利分析</h1>
+            <div class="meta">理解数据在信息网络中的分布 | 发现套利机会</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- 核心公式说明 -->
+        <div class="metric-explanation">
+            <h3>💡 有趣度公式</h3>
+            <div class="formula">
+                <span class="highlight">有趣度</span> = 中介中心性 ÷ 程度中心性 = <span class="highlight">价值</span> ÷ 传播 = <span class="highlight">套利机会</span>
+            </div>
+            <p>
+                <strong>中介中心性（Betweenness）</strong>：节点在网络中作为"桥梁"的重要程度，代表<strong>信息价值</strong><br>
+                <strong>程度中心性（Degree）</strong>：节点的连接数量，代表<strong>传播广度</strong><br>
+                <strong>有趣度（Interestingness）</strong>：高价值但尚未广泛传播的内容 = <strong>套利机会</strong>
+            </p>
+        </div>
+
+        <!-- 三榜单 -->
+        <div class="three-rankings">
+            <!-- 有趣度榜 -->
+            <div class="ranking-card" style="border-top: 4px solid #ffd700;">
+                <div class="ranking-card-header">
+                    <span class="ranking-card-icon">💎</span>
+                    <div>
+                        <div class="ranking-card-title">有趣度榜</div>
+                        <div class="ranking-card-subtitle">高价值 + 低传播 = 套利机会</div>
+                    </div>
+                </div>
+                <ol class="ranking-list" id="interestingness-ranking">
+                    <!-- 动态填充 -->
+                </ol>
+            </div>
+
+            <!-- 中介中心性榜 -->
+            <div class="ranking-card" style="border-top: 4px solid #667eea;">
+                <div class="ranking-card-header">
+                    <span class="ranking-card-icon">🌉</span>
+                    <div>
+                        <div class="ranking-card-title">中介中心性榜</div>
+                        <div class="ranking-card-subtitle">信息桥梁 = 高价值内容</div>
+                    </div>
+                </div>
+                <ol class="ranking-list" id="betweenness-ranking">
+                    <!-- 动态填充 -->
+                </ol>
+            </div>
+
+            <!-- 程度中心性榜 -->
+            <div class="ranking-card" style="border-top: 4px solid #f5576c;">
+                <div class="ranking-card-header">
+                    <span class="ranking-card-icon">🔥</span>
+                    <div>
+                        <div class="ranking-card-title">程度中心性榜</div>
+                        <div class="ranking-card-subtitle">广泛传播 = 热门内容</div>
+                    </div>
+                </div>
+                <ol class="ranking-list" id="degree-ranking">
+                    <!-- 动态填充 -->
+                </ol>
+            </div>
+        </div>
+
+        <!-- 信息网络图 -->
+        <div class="network-container">
+            <div class="chart-title">🕸️ 信息网络图</div>
+
+            <!-- 控制面板 -->
+            <div class="network-controls">
+                <div class="control-group">
+                    <label>节点大小：</label>
+                    <select id="node-size-metric" onchange="updateNetwork()">
+                        <option value="interestingness" selected>有趣度</option>
+                        <option value="betweenness">中介中心性</option>
+                        <option value="degree">程度中心性</option>
+                        <option value="views">播放量</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>节点颜色：</label>
+                    <select id="node-color-metric" onchange="updateNetwork()">
+                        <option value="interestingness" selected>有趣度</option>
+                        <option value="betweenness">中介中心性</option>
+                        <option value="degree">程度中心性</option>
+                        <option value="category">分类</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>显示节点：</label>
+                    <select id="node-filter" onchange="updateNetwork()">
+                        <option value="all">全部</option>
+                        <option value="top-interestingness">有趣度 Top 20</option>
+                        <option value="top-betweenness">中介中心性 Top 20</option>
+                        <option value="top-degree">程度中心性 Top 20</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="network-wrapper" id="network-graph"></div>
+
+            <!-- 图例 -->
+            <div class="network-legend">
+                <div class="legend-item">
+                    <span class="legend-dot interesting"></span>
+                    <span>高有趣度（套利机会）</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot hot"></span>
+                    <span>高中介中心性（信息桥梁）</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot medium"></span>
+                    <span>中等</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot cold"></span>
+                    <span>低中心性</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细解释 -->
+        <div class="grid-2">
+            <div class="chart-container">
+                <div class="chart-title">📊 中心性指标分布</div>
+                <div class="chart-wrapper" style="height: 350px;">
+                    <canvas id="centrality-distribution"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">🎯 有趣度 vs 播放量</div>
+                <div class="chart-wrapper" style="height: 350px;">
+                    <canvas id="interestingness-scatter"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 示例数据（实际使用时替换）
+        // ============================================
+        const NETWORK_DATA = {
+            videos: [
+                { id: 1, title: '中医养生秘诀', views: 1500000, betweenness: 0.85, degree: 0.3, interestingness: 2.83 },
+                { id: 2, title: '降血压食疗方法', views: 800000, betweenness: 0.72, degree: 0.25, interestingness: 2.88 },
+                { id: 3, title: '老年人运动指南', views: 2000000, betweenness: 0.45, degree: 0.8, interestingness: 0.56 },
+                { id: 4, title: '膝盖保健操', views: 500000, betweenness: 0.65, degree: 0.2, interestingness: 3.25 },
+                { id: 5, title: '失眠调理秘方', views: 1200000, betweenness: 0.78, degree: 0.35, interestingness: 2.23 },
+                { id: 6, title: '养生茶推荐', views: 3000000, betweenness: 0.3, degree: 0.9, interestingness: 0.33 },
+                { id: 7, title: '颈椎病自我康复', views: 600000, betweenness: 0.82, degree: 0.28, interestingness: 2.93 },
+                { id: 8, title: '糖尿病饮食禁忌', views: 900000, betweenness: 0.55, degree: 0.45, interestingness: 1.22 },
+                { id: 9, title: '补肾食疗方', views: 400000, betweenness: 0.88, degree: 0.22, interestingness: 4.0 },
+                { id: 10, title: '高血压穴位按摩', views: 700000, betweenness: 0.7, degree: 0.32, interestingness: 2.19 },
+            ],
+            links: [
+                { source: 1, target: 2, weight: 3 },
+                { source: 1, target: 5, weight: 2 },
+                { source: 2, target: 8, weight: 4 },
+                { source: 3, target: 6, weight: 5 },
+                { source: 4, target: 7, weight: 3 },
+                { source: 5, target: 9, weight: 2 },
+                { source: 6, target: 3, weight: 4 },
+                { source: 7, target: 4, weight: 2 },
+                { source: 8, target: 10, weight: 3 },
+                { source: 9, target: 1, weight: 2 },
+                { source: 10, target: 2, weight: 3 },
+                { source: 1, target: 3, weight: 1 },
+                { source: 4, target: 9, weight: 2 },
+                { source: 5, target: 7, weight: 1 },
+                { source: 6, target: 8, weight: 2 },
+            ]
+        };
+
+        // ============================================
+        // 初始化榜单
+        // ============================================
+        function initRankings() {
+            // 有趣度榜
+            const interestingnessRanking = [...NETWORK_DATA.videos]
+                .sort((a, b) => b.interestingness - a.interestingness)
+                .slice(0, 5);
+            renderRanking('interestingness-ranking', interestingnessRanking, 'interestingness', '#ffd700');
+
+            // 中介中心性榜
+            const betweennessRanking = [...NETWORK_DATA.videos]
+                .sort((a, b) => b.betweenness - a.betweenness)
+                .slice(0, 5);
+            renderRanking('betweenness-ranking', betweennessRanking, 'betweenness', '#667eea');
+
+            // 程度中心性榜
+            const degreeRanking = [...NETWORK_DATA.videos]
+                .sort((a, b) => b.degree - a.degree)
+                .slice(0, 5);
+            renderRanking('degree-ranking', degreeRanking, 'degree', '#f5576c');
+        }
+
+        function renderRanking(containerId, items, metric, color) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = items.map((item, i) => {
+                const posClass = i === 0 ? 'top-1' : i === 1 ? 'top-2' : i === 2 ? 'top-3' : 'normal';
+                const score = item[metric].toFixed(2);
+                return `
+                    <li class="ranking-item" data-id="${item.id}">
+                        <div class="ranking-position ${posClass}">${i + 1}</div>
+                        <div class="ranking-content">
+                            <div class="ranking-title">${item.title}</div>
+                            <div class="ranking-meta">播放量: ${item.views.toLocaleString()}</div>
+                        </div>
+                        <div class="ranking-score" style="color: ${color}">${score}</div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        // ============================================
+        // 初始化网络图
+        // ============================================
+        let network = null;
+
+        function initNetwork() {
+            const container = document.getElementById('network-graph');
+
+            const sizeMetric = document.getElementById('node-size-metric').value;
+            const colorMetric = document.getElementById('node-color-metric').value;
+
+            // 构建节点数据
+            const nodes = NETWORK_DATA.videos.map(v => {
+                // 计算节点大小
+                let size;
+                switch(sizeMetric) {
+                    case 'betweenness': size = 10 + v.betweenness * 40; break;
+                    case 'degree': size = 10 + v.degree * 40; break;
+                    case 'views': size = 10 + (v.views / 3000000) * 40; break;
+                    case 'interestingness':
+                    default: size = 10 + (v.interestingness / 4) * 40; break;
+                }
+
+                // 计算节点颜色
+                let color;
+                switch(colorMetric) {
+                    case 'betweenness':
+                        color = v.betweenness > 0.7 ? '#667eea' : v.betweenness > 0.4 ? '#a8b4ff' : '#e0e5ff';
+                        break;
+                    case 'degree':
+                        color = v.degree > 0.7 ? '#f5576c' : v.degree > 0.4 ? '#ff9aa8' : '#ffe0e4';
+                        break;
+                    case 'interestingness':
+                    default:
+                        color = v.interestingness > 2 ? '#ffd700' : v.interestingness > 1 ? '#ffeb80' : '#fff8cc';
+                        break;
+                }
+
+                return {
+                    id: v.id,
+                    label: v.title.substring(0, 10) + '...',
+                    value: size,
+                    color: { background: color, border: color },
+                    title: `<b>${v.title}</b><br>
+                            播放量: ${v.views.toLocaleString()}<br>
+                            有趣度: ${v.interestingness.toFixed(2)}<br>
+                            中介中心性: ${v.betweenness.toFixed(2)}<br>
+                            程度中心性: ${v.degree.toFixed(2)}`
+                };
+            });
+
+            // 构建边数据
+            const edges = NETWORK_DATA.links.map(l => ({
+                from: l.source,
+                to: l.target,
+                width: l.weight,
+                color: { opacity: 0.5 }
+            }));
+
+            const data = {
+                nodes: new vis.DataSet(nodes),
+                edges: new vis.DataSet(edges)
+            };
+
+            const options = {
+                nodes: {
+                    shape: 'dot',
+                    scaling: {
+                        min: 15,
+                        max: 50,
+                        label: { enabled: true, min: 12, max: 24 }
+                    },
+                    font: { size: 12, face: 'Arial' }
+                },
+                edges: {
+                    smooth: { type: 'continuous' }
+                },
+                physics: {
+                    stabilization: { iterations: 150 },
+                    barnesHut: {
+                        gravitationalConstant: -3000,
+                        springConstant: 0.04,
+                        springLength: 120
+                    }
+                },
+                interaction: {
+                    hover: true,
+                    tooltipDelay: 100
+                }
+            };
+
+            if (network) {
+                network.destroy();
+            }
+            network = new vis.Network(container, data, options);
+        }
+
+        function updateNetwork() {
+            initNetwork();
+        }
+
+        // ============================================
+        // 初始化图表
+        // ============================================
+        function initCharts() {
+            // 中心性分布散点图
+            const ctx1 = document.getElementById('centrality-distribution');
+            new Chart(ctx1, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '视频',
+                        data: NETWORK_DATA.videos.map(v => ({
+                            x: v.betweenness,
+                            y: v.degree
+                        })),
+                        backgroundColor: NETWORK_DATA.videos.map(v =>
+                            v.interestingness > 2 ? 'rgba(255, 215, 0, 0.8)' :
+                            v.interestingness > 1 ? 'rgba(102, 126, 234, 0.8)' :
+                            'rgba(79, 172, 254, 0.8)'
+                        ),
+                        pointRadius: NETWORK_DATA.videos.map(v => 5 + v.interestingness * 3)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const v = NETWORK_DATA.videos[context.dataIndex];
+                                    return [
+                                        v.title,
+                                        `中介中心性: ${v.betweenness.toFixed(2)}`,
+                                        `程度中心性: ${v.degree.toFixed(2)}`,
+                                        `有趣度: ${v.interestingness.toFixed(2)}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '中介中心性（价值）' },
+                            min: 0, max: 1
+                        },
+                        y: {
+                            title: { display: true, text: '程度中心性（传播）' },
+                            min: 0, max: 1
+                        }
+                    }
+                }
+            });
+
+            // 有趣度 vs 播放量
+            const ctx2 = document.getElementById('interestingness-scatter');
+            new Chart(ctx2, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '视频',
+                        data: NETWORK_DATA.videos.map(v => ({
+                            x: v.views,
+                            y: v.interestingness
+                        })),
+                        backgroundColor: 'rgba(255, 215, 0, 0.7)',
+                        pointRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const v = NETWORK_DATA.videos[context.dataIndex];
+                                    return [v.title, `播放量: ${v.views.toLocaleString()}`, `有趣度: ${v.interestingness.toFixed(2)}`];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: '播放量' } },
+                        y: { title: { display: true, text: '有趣度（套利机会）' } }
+                    }
+                }
+            });
+        }
+
+        // ============================================
+        // 页面加载
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initRankings();
+            initNetwork();
+            initCharts();
+        });
+    </script>
+</body>
+</html>

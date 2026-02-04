@@ -1,0 +1,467 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e36] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e37]:
+      - img [ref=e38]
+    - generic [ref=e41]:
+      - button "Open issues overlay" [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: "2"
+          - generic [ref=e45]: "3"
+        - generic [ref=e46]:
+          - text: Issue
+          - generic [ref=e47]: s
+      - button "Collapse issues badge" [ref=e48]:
+        - img [ref=e49]
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e6]:
+        - link "📊 YouTube 竞品分析" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: 📊
+          - generic [ref=e9]: YouTube 竞品分析
+        - generic [ref=e10]:
+          - link "首页" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "视频" [ref=e12] [cursor=pointer]:
+            - /url: /videos
+          - link "频道" [ref=e13] [cursor=pointer]:
+            - /url: /channels
+          - link "趋势" [ref=e14] [cursor=pointer]:
+            - /url: /trends
+        - button "切换主题" [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+          - generic [ref=e19]: 切换主题
+    - main [ref=e20]:
+      - generic [ref=e22]:
+        - button "返回首页" [ref=e51] [cursor=pointer]:
+          - link "返回首页" [ref=e52]:
+            - /url: /
+            - img [ref=e53]
+            - text: 返回首页
+        - generic [ref=e55]:
+          - 'heading "搜索结果: \"test\"" [level=1] [ref=e56]'
+          - paragraph [ref=e57]: 共 156 条结果
+        - paragraph [ref=e59]: 当前排序：过去7天发布的视频，按播放量从高→低排序
+        - generic [ref=e60]:
+          - generic [ref=e62]:
+            - generic [ref=e64]: "#1"
+            - img "test - 视频 1" [ref=e66]
+            - generic [ref=e67]:
+              - heading "test - 视频 1" [level=3] [ref=e68]
+              - paragraph [ref=e69]: 频道 1 · 4M 订阅
+              - generic [ref=e70]:
+                - generic [ref=e71]:
+                  - paragraph [ref=e72]: 播放
+                  - paragraph [ref=e73]: 7.2M
+                - generic [ref=e74]:
+                  - paragraph [ref=e75]: 点赞
+                  - paragraph [ref=e76]: 5.5K
+                - generic [ref=e77]:
+                  - paragraph [ref=e78]: 评论
+                  - paragraph [ref=e79]: 6.9万
+                - generic [ref=e80]:
+                  - paragraph [ref=e81]: 时长
+                  - paragraph [ref=e82]: 33:12
+              - paragraph [ref=e83]: 2026/1/9
+          - generic [ref=e85]:
+            - generic [ref=e87]: "#2"
+            - img "test - 视频 2" [ref=e89]
+            - generic [ref=e90]:
+              - heading "test - 视频 2" [level=3] [ref=e91]
+              - paragraph [ref=e92]: 频道 2 · 4M 订阅
+              - generic [ref=e93]:
+                - generic [ref=e94]:
+                  - paragraph [ref=e95]: 播放
+                  - paragraph [ref=e96]: 6.2M
+                - generic [ref=e97]:
+                  - paragraph [ref=e98]: 点赞
+                  - paragraph [ref=e99]: 41.2万
+                - generic [ref=e100]:
+                  - paragraph [ref=e101]: 评论
+                  - paragraph [ref=e102]: 2.1万
+                - generic [ref=e103]:
+                  - paragraph [ref=e104]: 时长
+                  - paragraph [ref=e105]: 4:54
+              - paragraph [ref=e106]: 2026/1/8
+          - generic [ref=e108]:
+            - generic [ref=e110]: "#3"
+            - img "test - 视频 3" [ref=e112]
+            - generic [ref=e113]:
+              - heading "test - 视频 3" [level=3] [ref=e114]
+              - paragraph [ref=e115]: 频道 3 · 1M 订阅
+              - generic [ref=e116]:
+                - generic [ref=e117]:
+                  - paragraph [ref=e118]: 播放
+                  - paragraph [ref=e119]: 8.9M
+                - generic [ref=e120]:
+                  - paragraph [ref=e121]: 点赞
+                  - paragraph [ref=e122]: 3.6万
+                - generic [ref=e123]:
+                  - paragraph [ref=e124]: 评论
+                  - paragraph [ref=e125]: 7万
+                - generic [ref=e126]:
+                  - paragraph [ref=e127]: 时长
+                  - paragraph [ref=e128]: 49:55
+              - paragraph [ref=e129]: 2026/1/6
+          - generic [ref=e131]:
+            - generic [ref=e133]: "#4"
+            - img "test - 视频 4" [ref=e135]
+            - generic [ref=e136]:
+              - heading "test - 视频 4" [level=3] [ref=e137]
+              - paragraph [ref=e138]: 频道 4 · 8.7M 订阅
+              - generic [ref=e139]:
+                - generic [ref=e140]:
+                  - paragraph [ref=e141]: 播放
+                  - paragraph [ref=e142]: 9.5M
+                - generic [ref=e143]:
+                  - paragraph [ref=e144]: 点赞
+                  - paragraph [ref=e145]: 39万
+                - generic [ref=e146]:
+                  - paragraph [ref=e147]: 评论
+                  - paragraph [ref=e148]: 3.8K
+                - generic [ref=e149]:
+                  - paragraph [ref=e150]: 时长
+                  - paragraph [ref=e151]: 45:06
+              - paragraph [ref=e152]: 2026/2/1
+          - generic [ref=e154]:
+            - generic [ref=e156]: "#5"
+            - img "test - 视频 5" [ref=e158]
+            - generic [ref=e159]:
+              - heading "test - 视频 5" [level=3] [ref=e160]
+              - paragraph [ref=e161]: 频道 5 · 2.2M 订阅
+              - generic [ref=e162]:
+                - generic [ref=e163]:
+                  - paragraph [ref=e164]: 播放
+                  - paragraph [ref=e165]: 6.5M
+                - generic [ref=e166]:
+                  - paragraph [ref=e167]: 点赞
+                  - paragraph [ref=e168]: 32.3万
+                - generic [ref=e169]:
+                  - paragraph [ref=e170]: 评论
+                  - paragraph [ref=e171]: 5.9万
+                - generic [ref=e172]:
+                  - paragraph [ref=e173]: 时长
+                  - paragraph [ref=e174]: 53:58
+              - paragraph [ref=e175]: 2026/2/1
+          - generic [ref=e177]:
+            - generic [ref=e179]: "#6"
+            - img "test - 视频 6" [ref=e181]
+            - generic [ref=e182]:
+              - heading "test - 视频 6" [level=3] [ref=e183]
+              - paragraph [ref=e184]: 频道 6 · 6.8M 订阅
+              - generic [ref=e185]:
+                - generic [ref=e186]:
+                  - paragraph [ref=e187]: 播放
+                  - paragraph [ref=e188]: 8.1M
+                - generic [ref=e189]:
+                  - paragraph [ref=e190]: 点赞
+                  - paragraph [ref=e191]: 21.6万
+                - generic [ref=e192]:
+                  - paragraph [ref=e193]: 评论
+                  - paragraph [ref=e194]: 3.1万
+                - generic [ref=e195]:
+                  - paragraph [ref=e196]: 时长
+                  - paragraph [ref=e197]: 16:29
+              - paragraph [ref=e198]: 2026/1/27
+          - generic [ref=e200]:
+            - generic [ref=e202]: "#7"
+            - img "test - 视频 7" [ref=e204]
+            - generic [ref=e205]:
+              - heading "test - 视频 7" [level=3] [ref=e206]
+              - paragraph [ref=e207]: 频道 7 · 5.5M 订阅
+              - generic [ref=e208]:
+                - generic [ref=e209]:
+                  - paragraph [ref=e210]: 播放
+                  - paragraph [ref=e211]: 6.1M
+                - generic [ref=e212]:
+                  - paragraph [ref=e213]: 点赞
+                  - paragraph [ref=e214]: 39万
+                - generic [ref=e215]:
+                  - paragraph [ref=e216]: 评论
+                  - paragraph [ref=e217]: 4.1万
+                - generic [ref=e218]:
+                  - paragraph [ref=e219]: 时长
+                  - paragraph [ref=e220]: 29:41
+              - paragraph [ref=e221]: 2026/1/30
+          - generic [ref=e223]:
+            - generic [ref=e225]: "#8"
+            - img "test - 视频 8" [ref=e227]
+            - generic [ref=e228]:
+              - heading "test - 视频 8" [level=3] [ref=e229]
+              - paragraph [ref=e230]: 频道 8 · 3.2M 订阅
+              - generic [ref=e231]:
+                - generic [ref=e232]:
+                  - paragraph [ref=e233]: 播放
+                  - paragraph [ref=e234]: 3.3M
+                - generic [ref=e235]:
+                  - paragraph [ref=e236]: 点赞
+                  - paragraph [ref=e237]: 14万
+                - generic [ref=e238]:
+                  - paragraph [ref=e239]: 评论
+                  - paragraph [ref=e240]: 3.8K
+                - generic [ref=e241]:
+                  - paragraph [ref=e242]: 时长
+                  - paragraph [ref=e243]: 36:44
+              - paragraph [ref=e244]: 2026/1/17
+          - generic [ref=e246]:
+            - generic [ref=e248]: "#9"
+            - img "test - 视频 9" [ref=e250]
+            - generic [ref=e251]:
+              - heading "test - 视频 9" [level=3] [ref=e252]
+              - paragraph [ref=e253]: 频道 9 · 2.4M 订阅
+              - generic [ref=e254]:
+                - generic [ref=e255]:
+                  - paragraph [ref=e256]: 播放
+                  - paragraph [ref=e257]: 2.8M
+                - generic [ref=e258]:
+                  - paragraph [ref=e259]: 点赞
+                  - paragraph [ref=e260]: 13.9万
+                - generic [ref=e261]:
+                  - paragraph [ref=e262]: 评论
+                  - paragraph [ref=e263]: 7.7万
+                - generic [ref=e264]:
+                  - paragraph [ref=e265]: 时长
+                  - paragraph [ref=e266]: 15:32
+              - paragraph [ref=e267]: 2026/2/4
+          - generic [ref=e269]:
+            - generic [ref=e271]: "#10"
+            - img "test - 视频 10" [ref=e273]
+            - generic [ref=e274]:
+              - heading "test - 视频 10" [level=3] [ref=e275]
+              - paragraph [ref=e276]: 频道 10 · 6.3M 订阅
+              - generic [ref=e277]:
+                - generic [ref=e278]:
+                  - paragraph [ref=e279]: 播放
+                  - paragraph [ref=e280]: 8.2M
+                - generic [ref=e281]:
+                  - paragraph [ref=e282]: 点赞
+                  - paragraph [ref=e283]: 23.5万
+                - generic [ref=e284]:
+                  - paragraph [ref=e285]: 评论
+                  - paragraph [ref=e286]: 6.8万
+                - generic [ref=e287]:
+                  - paragraph [ref=e288]: 时长
+                  - paragraph [ref=e289]: 18:59
+              - paragraph [ref=e290]: 2026/2/3
+          - generic [ref=e292]:
+            - generic [ref=e294]: "#11"
+            - img "test - 视频 11" [ref=e296]
+            - generic [ref=e297]:
+              - heading "test - 视频 11" [level=3] [ref=e298]
+              - paragraph [ref=e299]: 频道 11 · 3.1M 订阅
+              - generic [ref=e300]:
+                - generic [ref=e301]:
+                  - paragraph [ref=e302]: 播放
+                  - paragraph [ref=e303]: 8M
+                - generic [ref=e304]:
+                  - paragraph [ref=e305]: 点赞
+                  - paragraph [ref=e306]: 15.9万
+                - generic [ref=e307]:
+                  - paragraph [ref=e308]: 评论
+                  - paragraph [ref=e309]: 6.4万
+                - generic [ref=e310]:
+                  - paragraph [ref=e311]: 时长
+                  - paragraph [ref=e312]: 29:24
+              - paragraph [ref=e313]: 2026/1/28
+          - generic [ref=e315]:
+            - generic [ref=e317]: "#12"
+            - img "test - 视频 12" [ref=e319]
+            - generic [ref=e320]:
+              - heading "test - 视频 12" [level=3] [ref=e321]
+              - paragraph [ref=e322]: 频道 12 · 3.9M 订阅
+              - generic [ref=e323]:
+                - generic [ref=e324]:
+                  - paragraph [ref=e325]: 播放
+                  - paragraph [ref=e326]: 2.1M
+                - generic [ref=e327]:
+                  - paragraph [ref=e328]: 点赞
+                  - paragraph [ref=e329]: 30.6万
+                - generic [ref=e330]:
+                  - paragraph [ref=e331]: 评论
+                  - paragraph [ref=e332]: 9.9万
+                - generic [ref=e333]:
+                  - paragraph [ref=e334]: 时长
+                  - paragraph [ref=e335]: 21:51
+              - paragraph [ref=e336]: 2026/1/8
+          - generic [ref=e338]:
+            - generic [ref=e340]: "#13"
+            - img "test - 视频 13" [ref=e342]
+            - generic [ref=e343]:
+              - heading "test - 视频 13" [level=3] [ref=e344]
+              - paragraph [ref=e345]: 频道 13 · 9.8M 订阅
+              - generic [ref=e346]:
+                - generic [ref=e347]:
+                  - paragraph [ref=e348]: 播放
+                  - paragraph [ref=e349]: 1.9M
+                - generic [ref=e350]:
+                  - paragraph [ref=e351]: 点赞
+                  - paragraph [ref=e352]: 27万
+                - generic [ref=e353]:
+                  - paragraph [ref=e354]: 评论
+                  - paragraph [ref=e355]: 8.7万
+                - generic [ref=e356]:
+                  - paragraph [ref=e357]: 时长
+                  - paragraph [ref=e358]: 5:02
+              - paragraph [ref=e359]: 2026/1/10
+          - generic [ref=e361]:
+            - generic [ref=e363]: "#14"
+            - img "test - 视频 14" [ref=e365]
+            - generic [ref=e366]:
+              - heading "test - 视频 14" [level=3] [ref=e367]
+              - paragraph [ref=e368]: 频道 14 · 5.5M 订阅
+              - generic [ref=e369]:
+                - generic [ref=e370]:
+                  - paragraph [ref=e371]: 播放
+                  - paragraph [ref=e372]: 77.6万
+                - generic [ref=e373]:
+                  - paragraph [ref=e374]: 点赞
+                  - paragraph [ref=e375]: 42.7万
+                - generic [ref=e376]:
+                  - paragraph [ref=e377]: 评论
+                  - paragraph [ref=e378]: 9.7万
+                - generic [ref=e379]:
+                  - paragraph [ref=e380]: 时长
+                  - paragraph [ref=e381]: 57:55
+              - paragraph [ref=e382]: 2026/1/13
+          - generic [ref=e384]:
+            - generic [ref=e386]: "#15"
+            - img "test - 视频 15" [ref=e388]
+            - generic [ref=e389]:
+              - heading "test - 视频 15" [level=3] [ref=e390]
+              - paragraph [ref=e391]: 频道 15 · 9.6M 订阅
+              - generic [ref=e392]:
+                - generic [ref=e393]:
+                  - paragraph [ref=e394]: 播放
+                  - paragraph [ref=e395]: 7.6M
+                - generic [ref=e396]:
+                  - paragraph [ref=e397]: 点赞
+                  - paragraph [ref=e398]: 42.5万
+                - generic [ref=e399]:
+                  - paragraph [ref=e400]: 评论
+                  - paragraph [ref=e401]: 7.9万
+                - generic [ref=e402]:
+                  - paragraph [ref=e403]: 时长
+                  - paragraph [ref=e404]: 40:09
+              - paragraph [ref=e405]: 2026/1/6
+          - generic [ref=e407]:
+            - generic [ref=e409]: "#16"
+            - img "test - 视频 16" [ref=e411]
+            - generic [ref=e412]:
+              - heading "test - 视频 16" [level=3] [ref=e413]
+              - paragraph [ref=e414]: 频道 16 · 3M 订阅
+              - generic [ref=e415]:
+                - generic [ref=e416]:
+                  - paragraph [ref=e417]: 播放
+                  - paragraph [ref=e418]: 4.7M
+                - generic [ref=e419]:
+                  - paragraph [ref=e420]: 点赞
+                  - paragraph [ref=e421]: 32.8万
+                - generic [ref=e422]:
+                  - paragraph [ref=e423]: 评论
+                  - paragraph [ref=e424]: 3万
+                - generic [ref=e425]:
+                  - paragraph [ref=e426]: 时长
+                  - paragraph [ref=e427]: 33:51
+              - paragraph [ref=e428]: 2026/1/12
+          - generic [ref=e430]:
+            - generic [ref=e432]: "#17"
+            - img "test - 视频 17" [ref=e434]
+            - generic [ref=e435]:
+              - heading "test - 视频 17" [level=3] [ref=e436]
+              - paragraph [ref=e437]: 频道 17 · 3.5M 订阅
+              - generic [ref=e438]:
+                - generic [ref=e439]:
+                  - paragraph [ref=e440]: 播放
+                  - paragraph [ref=e441]: 7.8M
+                - generic [ref=e442]:
+                  - paragraph [ref=e443]: 点赞
+                  - paragraph [ref=e444]: 14.4万
+                - generic [ref=e445]:
+                  - paragraph [ref=e446]: 评论
+                  - paragraph [ref=e447]: 6.7万
+                - generic [ref=e448]:
+                  - paragraph [ref=e449]: 时长
+                  - paragraph [ref=e450]: 9:28
+              - paragraph [ref=e451]: 2026/1/14
+          - generic [ref=e453]:
+            - generic [ref=e455]: "#18"
+            - img "test - 视频 18" [ref=e457]
+            - generic [ref=e458]:
+              - heading "test - 视频 18" [level=3] [ref=e459]
+              - paragraph [ref=e460]: 频道 18 · 5.5M 订阅
+              - generic [ref=e461]:
+                - generic [ref=e462]:
+                  - paragraph [ref=e463]: 播放
+                  - paragraph [ref=e464]: 8.3M
+                - generic [ref=e465]:
+                  - paragraph [ref=e466]: 点赞
+                  - paragraph [ref=e467]: 15.8万
+                - generic [ref=e468]:
+                  - paragraph [ref=e469]: 评论
+                  - paragraph [ref=e470]: 5.4万
+                - generic [ref=e471]:
+                  - paragraph [ref=e472]: 时长
+                  - paragraph [ref=e473]: 38:44
+              - paragraph [ref=e474]: 2026/1/16
+          - generic [ref=e476]:
+            - generic [ref=e478]: "#19"
+            - img "test - 视频 19" [ref=e480]
+            - generic [ref=e481]:
+              - heading "test - 视频 19" [level=3] [ref=e482]
+              - paragraph [ref=e483]: 频道 19 · 8.9M 订阅
+              - generic [ref=e484]:
+                - generic [ref=e485]:
+                  - paragraph [ref=e486]: 播放
+                  - paragraph [ref=e487]: 3.5M
+                - generic [ref=e488]:
+                  - paragraph [ref=e489]: 点赞
+                  - paragraph [ref=e490]: 28.6万
+                - generic [ref=e491]:
+                  - paragraph [ref=e492]: 评论
+                  - paragraph [ref=e493]: 7.6万
+                - generic [ref=e494]:
+                  - paragraph [ref=e495]: 时长
+                  - paragraph [ref=e496]: 51:33
+              - paragraph [ref=e497]: 2026/1/16
+          - generic [ref=e499]:
+            - generic [ref=e501]: "#20"
+            - img "test - 视频 20" [ref=e503]
+            - generic [ref=e504]:
+              - heading "test - 视频 20" [level=3] [ref=e505]
+              - paragraph [ref=e506]: 频道 20 · 4.5M 订阅
+              - generic [ref=e507]:
+                - generic [ref=e508]:
+                  - paragraph [ref=e509]: 播放
+                  - paragraph [ref=e510]: 9.2M
+                - generic [ref=e511]:
+                  - paragraph [ref=e512]: 点赞
+                  - paragraph [ref=e513]: 46.4万
+                - generic [ref=e514]:
+                  - paragraph [ref=e515]: 评论
+                  - paragraph [ref=e516]: 3.7万
+                - generic [ref=e517]:
+                  - paragraph [ref=e518]: 时长
+                  - paragraph [ref=e519]: 46:37
+              - paragraph [ref=e520]: 2026/1/31
+        - generic [ref=e522]:
+          - button "上一页" [disabled]:
+            - img
+            - text: 上一页
+          - generic [ref=e523]:
+            - button "1" [ref=e524] [cursor=pointer]
+            - button "2" [ref=e525] [cursor=pointer]
+            - button "3" [ref=e526] [cursor=pointer]
+            - generic [ref=e527]: ...
+            - button "8" [ref=e528] [cursor=pointer]
+          - button "下一页" [ref=e529] [cursor=pointer]:
+            - text: 下一页
+            - img [ref=e530]
+          - generic [ref=e532]: 第 1 / 8 页
+    - contentinfo [ref=e26]:
+      - generic [ref=e28]:
+        - paragraph [ref=e29]:
+          - text: © 2026 YouTube 竞品分析工具 ·
+          - link "GitHub" [ref=e30] [cursor=pointer]:
+            - /url: https://github.com
+        - paragraph [ref=e31]: Built with Next.js · Tailwind CSS · shadcn/ui

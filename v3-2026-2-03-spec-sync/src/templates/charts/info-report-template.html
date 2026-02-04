@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息报告 - 推理链式报告</title>
+    <link rel="stylesheet" href="chart-styles.css">
+    <style>
+        /* 报告专用样式 */
+
+        .report-body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        /* 假设区块 */
+        .hypothesis {
+            background: #667eea08;
+            border: 2px solid #667eea25;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+        }
+        .hypothesis-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .hypothesis-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.6;
+        }
+        .hypothesis-meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* 结论卡片 */
+        .conclusion-card {
+            border: 1px solid #e8e8e8;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .conclusion-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .conclusion-header {
+            padding: 18px 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .conclusion-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .conclusion-main {
+            flex: 1;
+        }
+        .conclusion-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.5;
+        }
+        .conclusion-summary {
+            font-size: 13px;
+            color: #666;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+        .conclusion-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .conclusion-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .tag-source {
+            background: #e8f4fd;
+            color: #1a73e8;
+        }
+        .tag-confidence {
+            background: #fef3e2;
+            color: #b8860b;
+        }
+        .tag-pattern {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .conclusion-expand {
+            font-size: 12px;
+            color: #667eea;
+            flex-shrink: 0;
+            margin-top: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* 展开的数据面板 */
+        .conclusion-detail {
+            border-top: 1px solid #f0f0f0;
+            padding: 18px 22px;
+            background: #fafbfc;
+            display: none;
+        }
+        .conclusion-detail.expanded {
+            display: block;
+        }
+        .detail-section {
+            margin-bottom: 16px;
+        }
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+        .detail-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .detail-data-ref {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .data-ref-chip {
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .data-ref-chip:hover {
+            border-color: #667eea;
+            background: #667eea05;
+        }
+        .data-ref-icon {
+            font-size: 14px;
+        }
+
+        /* 推理步骤 */
+        .reasoning-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .reasoning-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: #555;
+            padding: 6px 0;
+        }
+        .step-icon {
+            font-size: 16px;
+            min-width: 22px;
+        }
+        .step-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+        .step-weight {
+            font-size: 11px;
+            color: #888;
+            flex-shrink: 0;
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* 综合结论 */
+        .final-conclusion {
+            background: linear-gradient(135deg, #667eea08, #764ba208);
+            border: 2px solid #667eea35;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 8px;
+        }
+        .final-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .final-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .final-points {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .final-points li {
+            font-size: 14px;
+            color: #444;
+            padding: 6px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+        .final-arrow {
+            color: #667eea;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* 行动入口 */
+        .action-cta {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 12px;
+        }
+        .cta-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .cta-primary {
+            background: #667eea;
+            color: white;
+        }
+        .cta-primary:hover {
+            background: #5a6fd6;
+        }
+        .cta-secondary {
+            background: white;
+            color: #667eea;
+            border: 1.5px solid #667eea;
+        }
+        .cta-secondary:hover {
+            background: #667eea08;
+        }
+
+        /* 结论计数 */
+        .conclusion-count {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            padding: 8px 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>信息报告</h1>
+            <div class="meta" id="report-meta">推理链式分析报告</div>
+        </div>
+    </div>
+
+    <div class="report-body">
+
+        <!-- 研究假设 -->
+        <div class="hypothesis">
+            <div class="hypothesis-label">研究假设</div>
+            <div class="hypothesis-text" id="hypothesis-text"></div>
+            <div class="hypothesis-meta" id="hypothesis-meta"></div>
+        </div>
+
+        <!-- 结论列表（动态填充） -->
+        <div id="conclusions-list"></div>
+
+        <div class="conclusion-count" id="conclusion-count"></div>
+
+        <!-- 综合结论 -->
+        <div class="final-conclusion">
+            <div class="final-label">综合结论</div>
+            <div class="final-text" id="final-text"></div>
+            <ul class="final-points" id="final-points"></ul>
+        </div>
+
+        <!-- 行动入口 -->
+        <div class="action-cta">
+            <button class="cta-btn cta-primary" onclick="exportReport()">📥 导出报告 (Markdown)</button>
+            <button class="cta-btn cta-secondary" onclick="goToActions()">🎯 查看行动清单 →</button>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================
+        // 示例数据 (实际使用时替换为真实数据)
+        // ============================================
+        const REPORT_DATA = {
+            // 报告元信息
+            meta: {
+                sample_videos: 2340,
+                sample_channels: 186,
+                report_date: '2026-02-04',
+                total_patterns: 42
+            },
+
+            // 研究假设
+            hypothesis: {
+                text: '在「养生」赛道中，是否存在搜索需求高但内容供给不足的细分话题，适合新创作者切入？',
+                keyword: '养生',
+                time_range: '12 个月',
+                data_sources: 'YouTube + Google Trends'
+            },
+
+            // 结论链（4 条核心结论）
+            conclusions: [
+                {
+                    title: '市场竞争分散，新人有机会进入',
+                    summary: 'Top 10 频道仅占总播放量的 23%，市场未被头部垄断。186 个频道中有 45% 是近 6 个月新建。',
+                    sources: [
+                        { icon: '📊', label: '全局认识 → 频道集中度图', link: '#' },
+                        { icon: '📈', label: '全局认识 → 频道增长趋势', link: '#' }
+                    ],
+                    confidence: 82,
+                    tags: [{ text: '全局认识 · 频道分布', type: 'source' }],
+                    reasoning: [
+                        { icon: '📊', text: '186 频道的播放量分布呈长尾，Top 10 集中度仅 23%', weight: '40%' },
+                        { icon: '📈', text: '45% 频道创建于近 6 个月，市场仍在扩张', weight: '40%' },
+                        { icon: '✅', text: '结论：市场处于成长期，新进入者有生存空间', weight: '结论' }
+                    ]
+                },
+                {
+                    title: '「穴位按摩」存在显著内容缺口',
+                    summary: 'Google 搜索量 +76%，但 YouTube 仅 7 条相关视频。搜索需求强，内容供给严重不足。',
+                    sources: [
+                        { icon: '📈', label: '套利分析 → 有趣度排名', link: '#' },
+                        { icon: '🔍', label: 'Google Trends → 穴位按摩', link: '#' }
+                    ],
+                    confidence: 88,
+                    tags: [
+                        { text: '套利分析 · 有趣度排名', type: 'source' },
+                        { text: 'Google Trends', type: 'source' },
+                        { text: '高优先级', type: 'pattern' }
+                    ],
+                    reasoning: [
+                        { icon: '🔍', text: 'Google Trends「穴位按摩」近 6 月搜索量 +76%', weight: '40%' },
+                        { icon: '📹', text: 'YouTube 搜索结果仅 7 条相关视频', weight: '40%' },
+                        { icon: '✅', text: '结论：搜索需求强但内容供给不足 = 显著套利机会', weight: '结论' }
+                    ]
+                },
+                {
+                    title: '4-20 分钟中视频平均播放最高',
+                    summary: '中视频均播 8.2 万（短视频 2.1 万，长视频 3.5 万）。时长是影响播放量的关键因素。',
+                    sources: [
+                        { icon: '📊', label: '全局认识 → 时长分布 vs 播放量', link: '#' }
+                    ],
+                    confidence: 78,
+                    tags: [
+                        { text: '全局认识 · 时长分布', type: 'source' }
+                    ],
+                    reasoning: [
+                        { icon: '⏱️', text: '按 YouTube 原生分档统计时长分布（<4min / 4-20min / >20min）', weight: '30%' },
+                        { icon: '📈', text: '中视频 (4-20min) 平均播放 8.2 万，短视频 2.1 万', weight: '50%' },
+                        { icon: '✅', text: '结论：采用 4-20 分钟时长是最优选择', weight: '结论' }
+                    ]
+                },
+                {
+                    title: 'Tai Chi 英文市场搜索量爆发，跨语言套利机会大',
+                    summary: '全球搜索量 +533%，英文 YouTube 相关视频仅 120 条。中文创作者可翻译现有内容切入。',
+                    sources: [
+                        { icon: '🔍', label: 'Google Trends → Tai Chi', link: '#' },
+                        { icon: '📊', label: '套利分析 → 跨语言机会', link: '#' }
+                    ],
+                    confidence: 85,
+                    tags: [
+                        { text: 'Google Trends', type: 'source' },
+                        { text: '套利分析 · 跨语言', type: 'source' }
+                    ],
+                    reasoning: [
+                        { icon: '🌍', text: 'Google Trends: Tai Chi 全球搜索量 12 个月 +533%', weight: '50%' },
+                        { icon: '📹', text: '英文 YouTube Tai Chi 视频仅约 120 条', weight: '30%' },
+                        { icon: '✅', text: '结论：中文创作者可翻译现有内容进入英文市场', weight: '结论' }
+                    ]
+                }
+            ],
+
+            // 综合结论
+            final_conclusion: {
+                text: '「养生」赛道新创作者的首选策略：切入内容缺口话题，采用 4-20 分钟中视频格式，快速测试市场反应。',
+                points: [
+                    '市场竞争分散（Top 10 占 23%），新人有生存空间',
+                    '「穴位按摩」等话题有明确的内容缺口和需求',
+                    '中视频 (4-20min) 平均播放量最高（8.2 万）',
+                    'Tai Chi 等英文热词可通过翻译内容快速变现'
+                ]
+            },
+
+            // 行动清单链接
+            action_list_url: '#actions'
+        };
+
+        // ============================================
+        // 渲染报告
+        // ============================================
+        function renderReport() {
+            const d = REPORT_DATA;
+
+            // 报告头
+            document.getElementById('report-meta').textContent =
+                `基于 ${d.meta.sample_videos.toLocaleString()} 条视频 · ${d.meta.sample_channels} 个频道 · ${d.meta.report_date} 生成`;
+
+            // 假设
+            document.getElementById('hypothesis-text').textContent = d.hypothesis.text;
+            document.getElementById('hypothesis-meta').textContent =
+                `关键词: ${d.hypothesis.keyword} · 分析范围: ${d.hypothesis.time_range} · 数据源: ${d.hypothesis.data_sources}`;
+
+            // 结论列表
+            const list = document.getElementById('conclusions-list');
+            list.innerHTML = d.conclusions.map((c, i) => `
+                <div class="conclusion-card" id="conclusion-${i}">
+                    <div class="conclusion-header" onclick="toggleDetail(${i})">
+                        <div class="conclusion-number">${i + 1}</div>
+                        <div class="conclusion-main">
+                            <div class="conclusion-title">${c.title}</div>
+                            <div class="conclusion-summary">${c.summary}</div>
+                            <div class="conclusion-tags">
+                                ${c.tags.map(t => `<span class="conclusion-tag tag-${t.type}">${t.text}</span>`).join('')}
+                                <span class="conclusion-tag tag-confidence">置信度 ${c.confidence}%</span>
+                            </div>
+                        </div>
+                        <div class="conclusion-expand" id="expand-btn-${i}">展开数据 ▼</div>
+                    </div>
+                    <div class="conclusion-detail" id="detail-${i}">
+                        <div class="detail-section">
+                            <div class="detail-label">数据来源（点击跳转）</div>
+                            <div class="detail-data-ref">
+                                ${c.sources.map(s => `
+                                    <a class="data-ref-chip" href="${s.link}" target="_blank">
+                                        <span class="data-ref-icon">${s.icon}</span>
+                                        <span>${s.label}</span>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <div class="detail-label">推理过程</div>
+                            <div class="reasoning-steps">
+                                ${c.reasoning.map(r => `
+                                    <div class="reasoning-step">
+                                        <span class="step-icon">${r.icon}</span>
+                                        <span class="step-text">${r.text}</span>
+                                        <span class="step-weight">${r.weight}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // 结论计数
+            document.getElementById('conclusion-count').textContent =
+                `共 ${d.conclusions.length} 条结论 · 基于 ${d.meta.total_patterns} 条模式分析提炼`;
+
+            // 综合结论
+            document.getElementById('final-text').textContent = d.final_conclusion.text;
+            document.getElementById('final-points').innerHTML = d.final_conclusion.points.map(p =>
+                `<li><span class="final-arrow">→</span>${p}</li>`
+            ).join('');
+        }
+
+        // ============================================
+        // 交互
+        // ============================================
+        function toggleDetail(index) {
+            const detail = document.getElementById(`detail-${index}`);
+            const btn = document.getElementById(`expand-btn-${index}`);
+            const isExpanded = detail.classList.contains('expanded');
+
+            detail.classList.toggle('expanded');
+            btn.textContent = isExpanded ? '展开数据 ▼' : '收起 ▲';
+        }
+
+        function exportReport() {
+            const d = REPORT_DATA;
+            let md = `# 信息报告\n\n`;
+            md += `> 生成日期: ${d.meta.report_date} · 视频样本: ${d.meta.sample_videos} · 频道: ${d.meta.sample_channels}\n\n`;
+
+            md += `## 研究假设\n\n${d.hypothesis.text}\n\n`;
+            md += `- 关键词: ${d.hypothesis.keyword}\n`;
+            md += `- 分析范围: ${d.hypothesis.time_range}\n`;
+            md += `- 数据源: ${d.hypothesis.data_sources}\n\n`;
+
+            md += `## 分析结论\n\n`;
+            d.conclusions.forEach((c, i) => {
+                md += `### 结论 ${i + 1}: ${c.title}\n\n`;
+                md += `${c.summary}\n\n`;
+                md += `- 置信度: ${c.confidence}%\n`;
+                md += `- 数据来源: ${c.sources.map(s => s.label).join(' / ')}\n\n`;
+                md += `**推理过程:**\n\n`;
+                c.reasoning.forEach(r => {
+                    md += `${r.icon} ${r.text} (${r.weight})\n\n`;
+                });
+            });
+
+            md += `## 综合结论\n\n**${d.final_conclusion.text}**\n\n`;
+            d.final_conclusion.points.forEach(p => {
+                md += `→ ${p}\n\n`;
+            });
+
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `info-report-${d.meta.report_date}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function goToActions() {
+            const url = REPORT_DATA.action_list_url;
+            if (url && url !== '#actions') {
+                window.location.href = url;
+            }
+        }
+
+        // ============================================
+        // 页面加载
+        // ============================================
+        document.addEventListener('DOMContentLoaded', renderReport);
+    </script>
+</body>
+</html>

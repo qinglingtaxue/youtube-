@@ -1,0 +1,100 @@
+- generic [ref=e1]:
+  - generic [ref=e36] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e37]:
+      - img [ref=e38]
+    - generic [ref=e41]:
+      - button "Open issues overlay" [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: "2"
+          - generic [ref=e45]: "3"
+        - generic [ref=e46]:
+          - text: Issue
+          - generic [ref=e47]: s
+      - button "Collapse issues badge" [ref=e48]:
+        - img [ref=e49]
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e6]:
+        - link "📊 YouTube 竞品分析" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: 📊
+          - generic [ref=e9]: YouTube 竞品分析
+        - generic [ref=e10]:
+          - link "首页" [ref=e11] [cursor=pointer]:
+            - /url: /
+          - link "视频" [ref=e12] [cursor=pointer]:
+            - /url: /videos
+          - link "频道" [ref=e13] [cursor=pointer]:
+            - /url: /channels
+          - link "趋势" [ref=e14] [cursor=pointer]:
+            - /url: /trends
+        - button "切换主题" [ref=e16] [cursor=pointer]:
+          - img [ref=e122]
+          - generic [ref=e19]: 切换主题
+    - main [ref=e20]:
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - heading "YouTube 竞品分析工具" [level=1] [ref=e54]
+          - paragraph [ref=e55]: 数据驱动选题发现，市场洞察与套利机会
+        - generic [ref=e56]:
+          - generic [ref=e58]:
+            - generic [ref=e59]:
+              - img [ref=e60]
+              - textbox "输入关键词搜索（如：养生、太极、中医）" [active] [ref=e63]: 养生
+            - button "搜索" [ref=e124] [cursor=pointer]:
+              - generic [ref=e125]: 搜索
+          - button "展开筛选条件" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - text: 展开筛选条件
+        - generic [ref=e69]:
+          - heading "核心功能" [level=2] [ref=e70]
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - img [ref=e74]
+                - heading "📊 视频列表" [level=3] [ref=e76]
+              - paragraph [ref=e77]: 按播放量/互动率筛选竞品视频
+              - button "进入 →" [ref=e78] [cursor=pointer]:
+                - link "进入 →" [ref=e79]:
+                  - /url: /videos
+            - generic [ref=e80]:
+              - generic [ref=e81]:
+                - img [ref=e82]
+                - heading "🏢 频道排行" [level=3] [ref=e86]
+              - paragraph [ref=e87]: 找高效率频道，对标学习对象
+              - button "进入 →" [ref=e88] [cursor=pointer]:
+                - link "进入 →" [ref=e89]:
+                  - /url: /channels
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - heading "🔥 话题趋势" [level=3] [ref=e95]
+              - paragraph [ref=e96]: 发现新兴话题，Google Trends 集成
+              - button "进入 →" [ref=e97] [cursor=pointer]:
+                - link "进入 →" [ref=e98]:
+                  - /url: /trends
+        - generic [ref=e99]:
+          - heading "快速发现" [level=2] [ref=e100]
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - heading "🔥 本周爆款 (播放量 Top 5)" [level=3] [ref=e103]
+              - link "查看全部 →" [ref=e104] [cursor=pointer]:
+                - /url: /videos?sort=views&time=7d
+            - generic [ref=e106]: 加载失败，请刷新页面
+          - generic [ref=e107]:
+            - generic [ref=e108]:
+              - heading "🏆 黑马频道 (低订阅高播放)" [level=3] [ref=e109]
+              - link "查看全部 →" [ref=e110] [cursor=pointer]:
+                - /url: /channels?type=high-efficiency
+            - generic [ref=e112]: 加载失败，请刷新页面
+        - generic [ref=e113]:
+          - heading "📈 数据概览" [level=2] [ref=e114]
+          - generic [ref=e115]: 加载失败，请刷新页面
+    - contentinfo [ref=e26]:
+      - generic [ref=e28]:
+        - paragraph [ref=e29]:
+          - text: © 2026 YouTube 竞品分析工具 ·
+          - link "GitHub" [ref=e30] [cursor=pointer]:
+            - /url: https://github.com
+        - paragraph [ref=e31]: Built with Next.js · Tailwind CSS · shadcn/ui
