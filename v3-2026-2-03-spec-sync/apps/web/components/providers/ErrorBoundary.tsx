@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode } from 'react'
+import { ReactNode, Component } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface Props {
@@ -13,7 +13,7 @@ interface State {
   error: Error | null
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends Component<Props, State> {
   public constructor(props: Props) {
     super(props)
     this.state = { hasError: false, error: null }
@@ -23,7 +23,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error }
   }
 
-  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: { componentStack: string }) {
     console.error('错误已捕获:', error, errorInfo)
   }
 
