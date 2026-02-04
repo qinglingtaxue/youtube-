@@ -77,11 +77,18 @@ export default function ArbitrageAnalysisPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* 页面头 */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">💰 套利分析</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            发现被低估的视频和频道 · 有趣度 = 中介中心性 ÷ 程度中心性
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2">💰 套利分析</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              发现被低估的视频和频道 · 有趣度 = 中介中心性 ÷ 程度中心性
+            </p>
+          </div>
+          <Link href="/insights/report" className="whitespace-nowrap">
+            <Button className="gap-2 bg-purple-600 hover:bg-purple-700 text-white">
+              📊 查看信息报告
+            </Button>
+          </Link>
         </div>
 
         {/* Tab 分组 */}
